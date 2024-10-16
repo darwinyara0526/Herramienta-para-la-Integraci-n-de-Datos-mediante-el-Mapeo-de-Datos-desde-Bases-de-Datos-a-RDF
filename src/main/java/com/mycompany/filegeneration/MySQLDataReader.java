@@ -1,13 +1,12 @@
 package com.mycompany.filegeneration;
 
-import com.mycompany.database.DatabaseConnectionMySQL;
 import java.sql.*;
 
 public class MySQLDataReader {
-    private DatabaseConnectionMySQL dbConnection;
+    private Connection connection; // Cambiado a Connection
 
-    public MySQLDataReader(DatabaseConnectionMySQL dbConnection) {
-        this.dbConnection = dbConnection;
+    public MySQLDataReader(Connection connection) {
+        this.connection = connection; // Guardar la conexión
     }
 
     public void readTables() {
@@ -19,12 +18,10 @@ public class MySQLDataReader {
     }
 
     public void showTableData(String tableName) {
-        Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
 
         try {
-            connection = dbConnection.getConnection();
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT * FROM " + tableName);
 
@@ -59,7 +56,6 @@ public class MySQLDataReader {
             try {
                 if (resultSet != null) resultSet.close();
                 if (statement != null) statement.close();
-                if (connection != null) connection.close();
             } catch (SQLException e) {
                 System.out.println("Error al cerrar los recursos: " + e.getMessage());
             }

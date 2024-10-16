@@ -1,99 +1,160 @@
 package com.mycompany.filegeneration;
 
-import com.mycompany.database.DatabaseConnectionMySQL;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Property;
-
-import java.io.FileOutputStream; 
-import java.io.IOException; 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MySQLR2RMLGenerator {
-    private DatabaseConnectionMySQL dbConnection;
 
-    public MySQLR2RMLGenerator(DatabaseConnectionMySQL dbConnection) {
-        this.dbConnection = dbConnection;
+    private Connection connection; // Conexión a la base de datos
+
+    // Constructor que inicializa la conexión a la base de datos
+    public MySQLR2RMLGenerator(Connection connection) {
+        this.connection = connection;
     }
 
-    public void generateR2RML(String outputPath) {
-        Connection connection = null;
-        Statement statement = null;
+    // Método principal para generar el archivo R2RML en formato TTL
+    public void generateR2RML(String outputFilePath) throws Exception {
+        DatabaseMetaData metaData = connection.getMetaData();
+        String[] types = {"TABLE"};
+        ResultSet tables = metaData.getTables(null, null, "%", types);
 
-        try {
-            // Establece la conexión a la base de datos
-            connection = dbConnection.getConnection();
-            statement = connection.createStatement();
+        // Crear archivo de salida TTL
+        try (FileWriter writer = new FileWriter(outputFilePath)) {
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
 
-            // Obtener todas las tablas de la base de datos
-            String tablesQuery = "SHOW TABLES";
-            ResultSet tablesResult = statement.executeQuery(tablesQuery);
-
-            // Crea un modelo RDF
-            Model model = ModelFactory.createDefaultModel();
-            String namespace = "http://example.com/your_namespace#";
-
-            boolean dataFound = false; // Variable para controlar si se generó algún dato
-
-            while (tablesResult.next()) {
-                String tableName = tablesResult.getString(1);
-
-                // Ignorar la tabla sys_config
-                if (tableName.equals("sys_config")) {
+                // Ignorar tabla `sys_config`
+                if (tableName.equalsIgnoreCase("sys_config")) {
                     continue;
                 }
 
-                // Obtener las columnas de la tabla actual
-                String columnsQuery = "SELECT * FROM " + tableName;
-                try (Statement columnStatement = connection.createStatement();
-                     ResultSet columnsResult = columnStatement.executeQuery(columnsQuery)) {
+                // Obtener la columna única (clave primaria)
+                String primaryKeyColumn = getPrimaryKeyColumn(tableName);
+                if (primaryKeyColumn == null) {
+                    System.err.println("No se encontró clave primaria para la tabla: " + tableName);
+                    continue; // Si no hay clave primaria, saltar a la siguiente tabla
+                }
 
-                    while (columnsResult.next()) {
-                        // Obtener el ID y las propiedades de la fila
-                        String id = columnsResult.getString(1); // Asumiendo que la primera columna es el ID
-                        Resource resource = model.createResource(namespace + id);
+                // Obtener columnas de la tabla
+                ResultSet columns = metaData.getColumns(null, null, tableName, "%");
+                while (columns.next()) {
+                    String columnName = columns.getString("COLUMN_NAME");
+                    String dataType = columns.getString("TYPE_NAME").toLowerCase(); // Obtener tipo de dato en minúsculas
+                    String rdfDataType = getRDFDataType(dataType); // Convertir al tipo de dato RDF adecuado
 
-                        // Recorrer todas las columnas de la fila
-                        for (int i = 2; i <= columnsResult.getMetaData().getColumnCount(); i++) { // Comenzamos en 2 para omitir el ID
-                            String columnName = columnsResult.getMetaData().getColumnName(i);
-                            Property property = model.createProperty(namespace + columnName);
-                            String value = columnsResult.getString(i);
-                            
-                            // Agrega propiedades al recurso
-                            resource.addProperty(property, value);
-                        }
-                        dataFound = true; // Se encontraron datos
-                    }
+                    // Generar plantilla R2RML para esta columna
+                    String tripleMap = createTripleMap(tableName, columnName, primaryKeyColumn, rdfDataType);
+
+                    // Escribir la plantilla al archivo TTL
+                    writer.write(tripleMap);
                 }
             }
 
-            // Solo se guarda el modelo si se encontró al menos un dato
-            if (dataFound) {
-                // Guarda el modelo RDF en el archivo
-                model.write(new FileOutputStream(outputPath), "TURTLE");
-                System.out.println("Archivo TTL generado correctamente: " + outputPath);
-
-                // También genera el archivo RDF
-                String rdfOutputPath = outputPath.replace(".ttl", ".rdf");
-                model.write(new FileOutputStream(rdfOutputPath), "RDF/XML");
-                System.out.println("Archivo RDF generado en: " + rdfOutputPath);
-            } else {
-                System.out.println("No se encontraron datos para generar archivos RDF.");
-            }
-
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } finally {
-            dbConnection.disconnect(connection);
-            try {
-                if (statement != null) statement.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Archivo R2RML TTL generado correctamente en: " + outputFilePath);
+        } catch (IOException e) {
+            System.err.println("Error al escribir el archivo: " + e.getMessage());
+            throw e; // Lanzar la excepción para que sea manejada por el llamador
+        } catch (Exception e) {
+            System.err.println("Error al generar el archivo R2RML: " + e.getMessage());
+            throw e; // Lanzar la excepción para que sea manejada por el llamador
         }
     }
+
+    // Método para obtener la columna clave primaria de una tabla
+    private String getPrimaryKeyColumn(String tableName) throws Exception {
+        DatabaseMetaData metaData = connection.getMetaData();
+        ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, tableName);
+
+        // Retornar la primera clave primaria encontrada
+        if (primaryKeys.next()) {
+            return primaryKeys.getString("COLUMN_NAME");
+        }
+        return null; // Si no hay clave primaria
+    }
+
+    // Método para crear el triple map en formato TTL para la tabla y la columna dadas
+    private String createTripleMap(String tableName, String columnName, String primaryKeyColumn, String rdfDataType) {
+        return String.format("<#%s_%s>\n"
+                + "    a rr:TriplesMap;\n"
+                + "    rr:logicalTable [ rr:tableName \"%s\" ];\n"
+                + "    rr:subjectMap [ rr:template \"http://example.com/%s/{%s}\" ];\n"
+                + "    rr:predicateObjectMap [\n"
+                + "        rr:predicate \"http://example.com/schema/%s\";\n"
+                + "        rr:objectMap [ rr:column \"%s\"; rr:datatype %s ]\n"
+                + "    ].\n\n",
+                escapeIdentifier(tableName), escapeIdentifier(columnName), escapeIdentifier(tableName),
+                escapeIdentifier(tableName), escapeIdentifier(primaryKeyColumn), escapeIdentifier(columnName),
+                escapeIdentifier(columnName), rdfDataType);
+    }
+
+    // Escapar caracteres especiales en identificadores
+    private String escapeIdentifier(String identifier) {
+        return identifier.replaceAll("[\"\\\\]", "\\\\$0"); // Escapa comillas y barras invertidas
+    }
+
+    // Mapa para convertir tipos de datos de SQL a tipos de datos RDF (XSD)
+    private String getRDFDataType(String sqlType) {
+        Map<String, String> typeMap = new HashMap<>();
+
+        // Tipos de datos XSD
+        typeMap.put("int", "xsd:integer");
+        typeMap.put("integer", "xsd:integer");
+        typeMap.put("tinyint", "xsd:boolean");  // Asumir que tinyint es booleano (0/1)
+        typeMap.put("smallint", "xsd:integer");
+        typeMap.put("bigint", "xsd:integer");
+        typeMap.put("bit", "xsd:boolean");
+        typeMap.put("float", "xsd:float");
+        typeMap.put("double", "xsd:double");
+        typeMap.put("decimal", "xsd:decimal");
+        typeMap.put("numeric", "xsd:decimal");
+        typeMap.put("date", "xsd:date");
+        typeMap.put("datetime", "xsd:dateTime");
+        typeMap.put("timestamp", "xsd:dateTime");
+        typeMap.put("varchar", "xsd:string");
+        typeMap.put("char", "xsd:string");
+        typeMap.put("text", "xsd:string");
+
+        // Tipos adicionales XSD
+        typeMap.put("boolean", "xsd:boolean");
+        typeMap.put("byte", "xsd:byte");
+        typeMap.put("short", "xsd:short");
+        typeMap.put("long", "xsd:long");
+        typeMap.put("unsignedByte", "xsd:unsignedByte");
+        typeMap.put("unsignedShort", "xsd:unsignedShort");
+        typeMap.put("unsignedInt", "xsd:unsignedInt");
+        typeMap.put("unsignedLong", "xsd:unsignedLong");
+        typeMap.put("hexBinary", "xsd:hexBinary");
+        typeMap.put("base64Binary", "xsd:base64Binary");
+        typeMap.put("anyURI", "xsd:anyURI");
+        typeMap.put("QName", "xsd:QName");
+        typeMap.put("string", "xsd:string");
+        typeMap.put("dateTime", "xsd:dateTime");
+        typeMap.put("duration", "xsd:duration");
+        typeMap.put("gDay", "xsd:gDay");
+        typeMap.put("gMonth", "xsd:gMonth");
+        typeMap.put("gMonthDay", "xsd:gMonthDay");
+        typeMap.put("gYear", "xsd:gYear");
+        typeMap.put("gYearMonth", "xsd:gYearMonth");
+        typeMap.put("time", "xsd:time");
+        typeMap.put("normalizedString", "xsd:normalizedString");
+        typeMap.put("token", "xsd:token");
+        typeMap.put("language", "xsd:language");
+        typeMap.put("NMTOKEN", "xsd:NMTOKEN");
+        typeMap.put("NMTOKENS", "xsd:NMTOKENS");
+        typeMap.put("Name", "xsd:Name");
+        typeMap.put("NCName", "xsd:NCName");
+        typeMap.put("ID", "xsd:ID");
+        typeMap.put("IDREF", "xsd:IDREF");
+        typeMap.put("IDREFS", "xsd:IDREFS");
+        typeMap.put("ENTITY", "xsd:ENTITY");
+        typeMap.put("ENTITIES", "xsd:ENTITIES");
+
+        return typeMap.getOrDefault(sqlType, "xsd:string"); // Si el tipo no está mapeado, usar string por defecto
+    }
+
 }

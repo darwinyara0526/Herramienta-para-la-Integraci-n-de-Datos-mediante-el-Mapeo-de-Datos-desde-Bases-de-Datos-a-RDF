@@ -12,6 +12,7 @@ public class DatabaseConnectionMySQL {
 
     // Método para obtener la conexión
     public Connection getConnection() throws SQLException {
+        // Intenta establecer una conexión a la base de datos
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
@@ -20,6 +21,7 @@ public class DatabaseConnectionMySQL {
         if (conn != null) {
             try {
                 conn.close();
+                System.out.println("Conexión cerrada correctamente.");
             } catch (SQLException e) {
                 System.err.println("Error al cerrar la conexión: " + e.getMessage());
             }
