@@ -3,76 +3,83 @@ package com.mycompany.filegeneration;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MySQLR2RMLGenerator {
+public class R2RMLGenerator {
 
     private Connection connection; // Conexión a la base de datos
 
     // Constructor que inicializa la conexión a la base de datos
-    public MySQLR2RMLGenerator(Connection connection) {
+    public R2RMLGenerator(Connection connection) {
         this.connection = connection;
     }
 
     // Método principal para generar el archivo R2RML en formato TTL
-    public void generateR2RML(String outputFilePath) throws Exception {
-        DatabaseMetaData metaData = connection.getMetaData();
-        String[] types = {"TABLE"};
-        ResultSet tables = metaData.getTables(null, null, "%", types);
+    public void generateR2RML(String outputFilePath) {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            String[] types = {"TABLE"};
+            ResultSet tables = metaData.getTables(null, null, "%", types);
 
-        // Crear archivo de salida TTL
-        try (FileWriter writer = new FileWriter(outputFilePath)) {
-            while (tables.next()) {
-                String tableName = tables.getString("TABLE_NAME");
+            // Crear archivo de salida TTL
+            try (FileWriter writer = new FileWriter(outputFilePath)) {
+                // Escribir definición de prefijos al inicio del archivo
+                writer.write("@prefix rr: <http://www.w3.org/ns/r2rml#> .\n");
+                writer.write("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n");
+                writer.write("\n");
 
-                // Ignorar tabla `sys_config`
-                if (tableName.equalsIgnoreCase("sys_config")) {
-                    continue;
+                while (tables.next()) {
+                    String tableName = tables.getString("TABLE_NAME");
+
+                    // Ignorar tabla `sys_config`
+                    if ("sys_config".equalsIgnoreCase(tableName)) {
+                        continue;
+                    }
+
+                    // Obtener la columna única (clave primaria)
+                    String primaryKeyColumn = getPrimaryKeyColumn(tableName);
+                    if (primaryKeyColumn == null) {
+                        System.err.println("No se encontró clave primaria para la tabla: " + tableName);
+                        continue; // Si no hay clave primaria, saltar a la siguiente tabla
+                    }
+
+                    // Obtener columnas de la tabla
+                    ResultSet columns = metaData.getColumns(null, null, tableName, "%");
+                    while (columns.next()) {
+                        String columnName = columns.getString("COLUMN_NAME");
+                        String dataType = columns.getString("TYPE_NAME").toLowerCase(); // Obtener tipo de dato en minúsculas
+                        String rdfDataType = getRDFDataType(dataType); // Convertir al tipo de dato RDF adecuado
+
+                        // Generar plantilla R2RML para esta columna
+                        String tripleMap = createTripleMap(tableName, columnName, primaryKeyColumn, rdfDataType);
+
+                        // Escribir la plantilla al archivo TTL
+                        writer.write(tripleMap);
+                    }
                 }
 
-                // Obtener la columna única (clave primaria)
-                String primaryKeyColumn = getPrimaryKeyColumn(tableName);
-                if (primaryKeyColumn == null) {
-                    System.err.println("No se encontró clave primaria para la tabla: " + tableName);
-                    continue; // Si no hay clave primaria, saltar a la siguiente tabla
-                }
-
-                // Obtener columnas de la tabla
-                ResultSet columns = metaData.getColumns(null, null, tableName, "%");
-                while (columns.next()) {
-                    String columnName = columns.getString("COLUMN_NAME");
-                    String dataType = columns.getString("TYPE_NAME").toLowerCase(); // Obtener tipo de dato en minúsculas
-                    String rdfDataType = getRDFDataType(dataType); // Convertir al tipo de dato RDF adecuado
-
-                    // Generar plantilla R2RML para esta columna
-                    String tripleMap = createTripleMap(tableName, columnName, primaryKeyColumn, rdfDataType);
-
-                    // Escribir la plantilla al archivo TTL
-                    writer.write(tripleMap);
-                }
+                System.out.println("Archivo R2RML TTL generado correctamente en: " + outputFilePath);
+            } catch (IOException e) {
+                System.err.println("Error al escribir el archivo: " + e.getMessage());
             }
-
-            System.out.println("Archivo R2RML TTL generado correctamente en: " + outputFilePath);
-        } catch (IOException e) {
-            System.err.println("Error al escribir el archivo: " + e.getMessage());
-            throw e; // Lanzar la excepción para que sea manejada por el llamador
-        } catch (Exception e) {
-            System.err.println("Error al generar el archivo R2RML: " + e.getMessage());
-            throw e; // Lanzar la excepción para que sea manejada por el llamador
+        } catch (SQLException e) {
+            System.err.println("Error al acceder a los metadatos de la base de datos: " + e.getMessage());
         }
     }
 
     // Método para obtener la columna clave primaria de una tabla
-    private String getPrimaryKeyColumn(String tableName) throws Exception {
-        DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, tableName);
-
-        // Retornar la primera clave primaria encontrada
-        if (primaryKeys.next()) {
-            return primaryKeys.getString("COLUMN_NAME");
+    private String getPrimaryKeyColumn(String tableName) {
+        try {
+            ResultSet primaryKeys = connection.getMetaData().getPrimaryKeys(null, null, tableName);
+            if (primaryKeys.next()) {
+                return primaryKeys.getString("COLUMN_NAME");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener la clave primaria para la tabla " + tableName + ": " + e.getMessage());
         }
         return null; // Si no hay clave primaria
     }

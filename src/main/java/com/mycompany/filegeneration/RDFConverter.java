@@ -14,11 +14,11 @@ import org.apache.jena.riot.Lang;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MySQLRDFConverter {
+public class RDFConverter {
 
     private Connection connection;
 
-    public MySQLRDFConverter(Connection connection) {
+    public RDFConverter(Connection connection) {
         this.connection = connection;
     }
 

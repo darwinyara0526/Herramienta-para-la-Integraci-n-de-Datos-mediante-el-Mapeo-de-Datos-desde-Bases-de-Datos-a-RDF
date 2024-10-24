@@ -2,10 +2,10 @@ package com.mycompany.filegeneration;
 
 import java.sql.*;
 
-public class MySQLDataReader {
+public class DataReader {
     private Connection connection; // Cambiado a Connection
 
-    public MySQLDataReader(Connection connection) {
+    public DataReader(Connection connection) {
         this.connection = connection; // Guardar la conexión
     }
 

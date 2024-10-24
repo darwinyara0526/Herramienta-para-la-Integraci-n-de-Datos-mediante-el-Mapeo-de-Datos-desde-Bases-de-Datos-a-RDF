@@ -1,44 +1,62 @@
 package com.mycompany.proyectov2;
 
-import com.mycompany.filegeneration.MySQLR2RMLGenerator;
-import com.mycompany.filegeneration.MySQLRDFConverter;
-import com.mycompany.filegeneration.MySQLDataReader;
+import com.mycompany.filegeneration.R2RMLGenerator;
+import com.mycompany.filegeneration.RDFConverter;
+import com.mycompany.filegeneration.DataReader;
 import com.mycompany.database.DatabaseConnectionMySQL;
+import com.mycompany.database.DatabaseConnectionPostgreSQL;
+import com.mycompany.database.DatabaseConnection;
 
 import java.sql.Connection;
 
 public class Main {
     public static void main(String[] args) {
-        // Rutas donde se guardarán los archivos R2RML y RDF
-        String outputPath = "/home/darwin/Escritorio/Proyecto/archivo.ttl"; // Archivo Turtle
-        String outputRDFPath = "/home/darwin/Escritorio/Proyecto/archivo.rdf"; // Archivo RDF/XML
+        // Rutas para los archivos R2RML y RDF de MySQL
+        String mysqlTurtlePath = "/home/darwin/Escritorio/Proyecto/mysql_output.ttl";
+        String mysqlRDFPath = "/home/darwin/Escritorio/Proyecto/mysql_output.rdf";
 
-        // Crear instancia de DatabaseConnectionMySQL
-        DatabaseConnectionMySQL dbConnection = new DatabaseConnectionMySQL();
+        // Rutas para los archivos R2RML y RDF de PostgreSQL
+        String postgresTurtlePath = "/home/darwin/Escritorio/Proyecto/postgres_output.ttl";
+        String postgresRDFPath = "/home/darwin/Escritorio/Proyecto/postgres_output.rdf";
+
+        // Procesar MySQL
+        processDatabase(new DatabaseConnectionMySQL(), mysqlTurtlePath, mysqlRDFPath);
+
+        // Procesar PostgreSQL
+        processDatabase(new DatabaseConnectionPostgreSQL(), postgresTurtlePath, postgresRDFPath);
+    }
+
+    /**
+     * Método para procesar una base de datos y generar los archivos TTL y RDF
+     */
+    private static void processDatabase(DatabaseConnection dbConnection, String outputTurtlePath, String outputRDFPath) {
         Connection connection = null; // Declarar conexión
 
         try {
-            // Obtener la conexión a la base de datos
-            connection = dbConnection.getConnection();
+            // Conectar a la base de datos
+            connection = dbConnection.connect();
+            System.out.println("Conectado a la base de datos: " + dbConnection.getDatabaseType());
 
             // Instancia del generador R2RML
-            MySQLR2RMLGenerator r2rmlGenerator = new MySQLR2RMLGenerator(connection);
+            R2RMLGenerator r2rmlGenerator = new R2RMLGenerator(connection);
 
             // Leer y mostrar datos de las tablas
-            MySQLDataReader dataReader = new MySQLDataReader(connection);
+            DataReader dataReader = new DataReader(connection);
             dataReader.readTables();
 
-            // Generar el archivo R2RML
-            r2rmlGenerator.generateR2RML(outputPath);
-            
-            // Crear instancia del convertidor RDF
-            MySQLRDFConverter rdfConverter = new MySQLRDFConverter(connection);
+            // Generar el archivo R2RML (Turtle)
+            r2rmlGenerator.generateR2RML(outputTurtlePath);
+            System.out.println("Archivo TTL generado en: " + outputTurtlePath);
+
             // Convertir el archivo Turtle a RDF/XML
-            rdfConverter.convertToRDF(outputPath, outputRDFPath);
+            RDFConverter rdfConverter = new RDFConverter(connection);
+            rdfConverter.convertToRDF(outputTurtlePath, outputRDFPath);
+            System.out.println("Archivo RDF generado en: " + outputRDFPath);
         } catch (Exception e) {
-            e.printStackTrace(); // Manejo de excepciones
+            e.printStackTrace();
         } finally {
-            dbConnection.disconnect(connection); // Asegúrate de desconectar la conexión
+            // Asegurarse de desconectar la base de datos
+            dbConnection.disconnect(connection);
         }
     }
 }
