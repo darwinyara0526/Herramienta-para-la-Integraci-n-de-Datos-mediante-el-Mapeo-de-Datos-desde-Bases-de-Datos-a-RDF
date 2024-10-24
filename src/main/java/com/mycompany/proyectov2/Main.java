@@ -19,10 +19,10 @@ public class Main {
         String postgresTurtlePath = "/home/darwin/Escritorio/Proyecto/postgres_output.ttl";
         String postgresRDFPath = "/home/darwin/Escritorio/Proyecto/postgres_output.rdf";
 
-        // Procesar MySQL
+        // Procesar MySQL automáticamente
         processDatabase(new DatabaseConnectionMySQL(), mysqlTurtlePath, mysqlRDFPath);
 
-        // Procesar PostgreSQL
+        // Procesar PostgreSQL automáticamente
         processDatabase(new DatabaseConnectionPostgreSQL(), postgresTurtlePath, postgresRDFPath);
     }
 
@@ -40,9 +40,9 @@ public class Main {
             // Instancia del generador R2RML
             R2RMLGenerator r2rmlGenerator = new R2RMLGenerator(connection);
 
-            // Leer y mostrar datos de las tablas
+            // Leer y procesar todas las tablas de la base de datos automáticamente
             DataReader dataReader = new DataReader(connection);
-            dataReader.readTables();
+            dataReader.readTables();  // Se encargará de leer todas las tablas automáticamente
 
             // Generar el archivo R2RML (Turtle)
             r2rmlGenerator.generateR2RML(outputTurtlePath);

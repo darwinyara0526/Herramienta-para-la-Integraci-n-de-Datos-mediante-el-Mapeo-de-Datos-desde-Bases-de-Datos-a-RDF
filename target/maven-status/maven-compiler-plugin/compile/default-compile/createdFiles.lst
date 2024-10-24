@@ -3,5 +3,6 @@ com/mycompany/database/DatabaseConnection.class
 com/mycompany/database/DatabaseConnectionMySQL.class
 com/mycompany/proyectov2/Main.class
 com/mycompany/filegeneration/R2RMLGenerator.class
+com/mycompany/rdfintegration/RDFIntegrator.class
 com/mycompany/database/DatabaseConnectionPostgreSQL.class
 com/mycompany/filegeneration/RDFConverter.class
