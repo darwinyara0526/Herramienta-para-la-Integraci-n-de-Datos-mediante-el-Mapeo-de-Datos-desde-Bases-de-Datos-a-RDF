@@ -2,7 +2,9 @@ com/mycompany/filegeneration/DataReader.class
 com/mycompany/database/DatabaseConnection.class
 com/mycompany/database/DatabaseConnectionMySQL.class
 com/mycompany/proyectov2/Main.class
+com/mycompany/interfaces/MainInterface.class
 com/mycompany/filegeneration/R2RMLGenerator.class
 com/mycompany/rdfintegration/RDFIntegrator.class
 com/mycompany/database/DatabaseConnectionPostgreSQL.class
+com/mycompany/interfaces/WelcomeScreen.class
 com/mycompany/filegeneration/RDFConverter.class
