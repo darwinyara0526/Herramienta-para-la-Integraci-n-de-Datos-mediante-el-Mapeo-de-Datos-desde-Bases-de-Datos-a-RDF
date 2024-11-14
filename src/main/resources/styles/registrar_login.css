@@ -1,0 +1,99 @@
+/* Estilos básicos para la página */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Menú superior */
+.menu-superior {
+    width: 100%;
+    background-color: #004d99;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.menu-superior .volver-button {
+    background-color: #ffffff;
+    border: none;
+    color: #004d99;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.menu-superior .volver-button:hover {
+    background-color: #cce0ff;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 600px;
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Título */
+.titulo {
+    color: #004d99;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* Mensaje informativo */
+.mensaje-informativo {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Estilo del formulario */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-weight: bold;
+    color: #004d99;
+}
+
+input, select, .connect-button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+}
+
+.connect-button {
+    background-color: #004d99;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.connect-button:hover {
+    background-color: #003366;
+}
+
+/* Mensaje de resultado */
+.resultado {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.resultado.success {
+    color: #006600;
+}
+
+.resultado.error {
+    color: #cc0000;
+}
+

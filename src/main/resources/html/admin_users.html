@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Usuarios</title>
+    <link rel="stylesheet" href="../styles/admin_users.css">
+</head>
+<body>
+    <!-- Menú superior -->
+    <div class="menu-bar">
+        <button class="back-button" onclick="volver()">Volver</button>
+        <h2 class="welcome-text">Administrar Usuarios</h2>
+        <button class="login-button" onclick="login()">Admin</button>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <h3 class="admin-title">Administra tus permisos</h3>
+        <p class="admin-description">Agrega o quita personas de tu grupo aquí. Este panel te permitirá administrar los usuarios y otorgarles permisos para acceder a las bases de datos.</p>
+        
+        <!-- Sección de bases de datos -->
+        <div class="db-blocks">
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="mysql">MySQL</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="postgresql">PostgreSQL</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="mssql">Microsoft SQL Server</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="oracle">Oracle Database</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="sqlite">SQLite</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="mongodb">MongoDB</div>
+            <div class="db-block" draggable="true" ondragstart="drag(event)" id="cassandra">Cassandra</div>
+        </div>
+
+        <!-- Lista de usuarios -->
+        <h4 class="user-list-title">Lista de Usuarios</h4>
+        <div class="user-list">
+            <div class="user-item">
+                <div class="user-details">
+                    <span class="user-name">Darwin</span>
+                    <span class="user-email">darwin@example.com</span>
+                    <select class="user-level">
+                        <option value="administrador">Administrador</option>
+                        <option value="editor">Editor</option>
+                        <option value="visualizador">Visualizador</option>
+                    </select>
+                </div>
+                <div class="user-granted-permissions" ondrop="dropPermission(event)" ondragover="allowDrop(event)">
+                    Permisos otorgados:
+                </div>
+            </div>
+            <div class="user-item">
+                <div class="user-details">
+                    <span class="user-name">Ana</span>
+                    <span class="user-email">ana@example.com</span>
+                    <select class="user-level">
+                        <option value="administrador">Administrador</option>
+                        <option value="editor">Editor</option>
+                        <option value="visualizador">Visualizador</option>
+                    </select>
+                </div>
+                <div class="user-granted-permissions" ondrop="dropPermission(event)" ondragover="allowDrop(event)">
+                    Permisos otorgados:
+                </div>
+            </div>
+            <!-- Agrega más usuarios según sea necesario -->
+        </div>
+
+        <!-- Botón para agregar un nuevo usuario -->
+        <button class="add-user-button" onclick="agregarUsuario()">Agregar Usuario</button>
+    </div>
+
+    <script src="../scripts/admin_users.js"></script>
+</body>
+</html>

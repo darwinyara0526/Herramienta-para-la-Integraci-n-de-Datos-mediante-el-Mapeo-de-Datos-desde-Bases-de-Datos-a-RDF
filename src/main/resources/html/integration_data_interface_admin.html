@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz de Integración de Datos</title>
+    <link rel="stylesheet" href="../styles/integration_data_interface_admin.css">
+</head>
+<body>
+    
+<!-- Menú superior -->
+    <div class="menu-bar">
+        <button class="back-button" onclick="volver()">Volver</button>
+        <h2 class="welcome-text">Usuario Admin</h2>
+        <button class="login-button" onclick="login()">Login</button>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Panel Izquierdo -->
+        <div class="left-panel">
+            <button class="add-db-button" onclick="agregarBaseDatos()">Agregar Bases de Datos</button>
+            <div class="db-list">
+                <h3>Bases de Datos Conectadas</h3>
+                <!-- Aquí se mostrarán las bases de datos conectadas como elementos arrastrables -->
+                <div id="connected-db-list"></div>
+            </div>
+            <button class="manage-user-button" onclick="administrarUsuario()">Administrar Usuario</button>
+        </div>
+
+        <!-- Panel Derecho -->
+        <div class="right-panel">
+            <h3 class="integration-title">Proceso de Integración de Datos</h3>
+            <p class="integration-description">Listo para integrar</p>
+
+            <div class="drag-drop-section">
+                <div class="drop-block" id="drop-zone-1" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    Arrastra aquí la primera base de datos
+                </div>
+                <div class="drop-block" id="drop-zone-2" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    Arrastra aquí la segunda base de datos
+                </div>
+            </div>
+
+            <p class="info-message">Una vez que los archivos estén listos, presiona "Integrar".</p>
+            <button class="integrate-button" onclick="iniciarIntegracion()">Integrar</button>
+            
+            <!-- Mensajes de estado -->
+            <div id="status-message"></div>
+            
+            <!-- Opciones de exportación -->
+            <div id="export-options" class="export-options hidden">
+                <button class="export-button">Exportar PDF</button>
+                <button class="export-button">Consultar SPARQL</button>
+                <button class="export-button">Exportar RDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/integration_data_interface_admin.js"></script>
+</body>
+</html>

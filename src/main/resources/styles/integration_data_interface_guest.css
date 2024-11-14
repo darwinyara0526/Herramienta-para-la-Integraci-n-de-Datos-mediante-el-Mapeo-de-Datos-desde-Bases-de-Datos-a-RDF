@@ -1,0 +1,167 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Evita el scroll de la página */
+}
+
+/* Menú superior */
+.menu-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(to right, #4a90e2, #2a5b8d);
+    color: white;
+}
+
+.back-button, .login-button {
+    background-color: #3a6ea5;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.welcome-text {
+    font-size: 20px;
+}
+
+/* Contenedor principal */
+.main-container {
+    display: flex;
+    width: 100vw; /* Ancho completo de la ventana */
+    height: calc(100vh - 60px); /* Altura completa menos el menú superior */
+}
+
+/* Panel izquierdo */
+.left-panel {
+    width: 20%; /* 20% del ancho total */
+    padding: 20px;
+    border-right: 2px solid #ccc;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.add-db-button {
+    display: block;
+    width: 100%;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.db-list {
+    margin-top: 20px;
+}
+
+.db-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.db-list li {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Panel derecho */
+.right-panel {
+    width: 80%; /* 80% del ancho total */
+    padding: 20px;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.integration-title {
+    font-size: 22px;
+    margin-top: 0;
+}
+
+.integration-description {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Sección de arrastrar y soltar */
+.drag-drop-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.drop-block {
+    width: 48%;
+    height: 80px;
+    border: 2px dashed #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.info-message {
+    font-size: 14px;
+    color: #777;
+    margin-top: 10px;
+}
+
+/* Botón de integración */
+.integrate-button {
+    display: block;
+    width: 100%;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Mensajes de estado */
+#status-message {
+    font-size: 16px;
+    color: #555;
+    margin-top: 15px;
+}
+
+/* Opciones de exportación */
+.export-options {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.export-button {
+    background-color: #3a6ea5;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}

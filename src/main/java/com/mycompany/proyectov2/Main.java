@@ -6,7 +6,9 @@ import com.mycompany.filegeneration.DataReader;
 import com.mycompany.database.DatabaseConnectionMySQL;
 import com.mycompany.database.DatabaseConnectionPostgreSQL;
 import com.mycompany.database.DatabaseConnection;
+import com.mycompany.interfaces.LoginInterface;
 import com.mycompany.rdfintegration.RDFIntegrator;
+import javax.swing.SwingUtilities;
 
 import java.sql.Connection;
 
@@ -18,22 +20,25 @@ public class Main {
 
     public static void main(String[] args) {
         // Configuración de rutas de salida para MySQL
-        String mysqlTurtlePath = "/home/darwin/Escritorio/Proyecto/mysql_output.ttl";
-        String mysqlRDFPath = "/home/darwin/Escritorio/Proyecto/mysql_output.rdf";
+        //String mysqlTurtlePath = "/home/darwin/Escritorio/Proyecto/mysql_output.ttl";
+        //String mysqlRDFPath = "/home/darwin/Escritorio/Proyecto/mysql_output.rdf";
 
         // Configuración de rutas de salida para PostgreSQL
-        String postgresTurtlePath = "/home/darwin/Escritorio/Proyecto/postgres_output.ttl";
-        String postgresRDFPath = "/home/darwin/Escritorio/Proyecto/postgres_output.rdf";
+        //String postgresTurtlePath = "/home/darwin/Escritorio/Proyecto/postgres_output.ttl";
+        //String postgresRDFPath = "/home/darwin/Escritorio/Proyecto/postgres_output.rdf";
 
         // Procesa automáticamente la base de datos MySQL
-        processDatabase(new DatabaseConnectionMySQL(), mysqlTurtlePath, mysqlRDFPath);
+        //processDatabase(new DatabaseConnectionMySQL(), mysqlTurtlePath, mysqlRDFPath);
 
         // Procesa automáticamente la base de datos PostgreSQL
-        processDatabase(new DatabaseConnectionPostgreSQL(), postgresTurtlePath, postgresRDFPath);
+        //processDatabase(new DatabaseConnectionPostgreSQL(), postgresTurtlePath, postgresRDFPath);
 
         // Integración de los archivos RDF de MySQL y PostgreSQL
-        RDFIntegrator integrator = new RDFIntegrator();
-        integrator.integrateAndExport(mysqlRDFPath, postgresRDFPath);
+        //RDFIntegrator integrator = new RDFIntegrator();
+        //integrator.integrateAndExport(mysqlRDFPath, postgresRDFPath);
+        
+        // Iniciar la Login
+        SwingUtilities.invokeLater(() -> new LoginInterface().main(new String[0])); // Llamada a LoginInterface
     }
 
     /**
