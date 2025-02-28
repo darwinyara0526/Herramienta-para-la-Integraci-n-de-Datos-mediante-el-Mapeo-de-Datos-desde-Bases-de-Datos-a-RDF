@@ -4,6 +4,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 
 public class RDFIntegrator {
 
@@ -23,7 +24,7 @@ public class RDFIntegrator {
             }
 
             // Exportar el modelo unificado a un archivo RDF/XML
-            String outputUnifiedRDFPath = "/home/darwin/Escritorio/Proyecto/unified_output.rdf";
+            String outputUnifiedRDFPath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "unified_output.rdf").toString();
             try (OutputStream out = new FileOutputStream(outputUnifiedRDFPath)) {
                 unifiedModel.write(out, "RDF/XML");
                 System.out.println("Modelo RDF unificado exportado a: " + outputUnifiedRDFPath);

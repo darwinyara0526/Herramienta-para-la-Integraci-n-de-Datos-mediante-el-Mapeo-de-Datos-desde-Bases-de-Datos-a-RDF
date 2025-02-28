@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseConnectionPostgreSQL implements DatabaseConnection {
     private static final String URL = "jdbc:postgresql://localhost:5432/productos"; // Cambia según tus credenciales
-    private static final String USER = "darwinyara26"; // Cambia según tus credenciales
+    private static final String USER = "postgres"; // Cambia según tus credenciales
     private static final String PASSWORD = "1familiayara"; // Cambia según tus credenciales
 
     @Override

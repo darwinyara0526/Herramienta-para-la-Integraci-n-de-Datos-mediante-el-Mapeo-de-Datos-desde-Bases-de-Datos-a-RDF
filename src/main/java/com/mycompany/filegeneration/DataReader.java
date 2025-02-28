@@ -1,86 +1,102 @@
 package com.mycompany.filegeneration;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DataReader {
+
     private Connection connection;
 
-    public DataReader(Connection connection) {
-        this.connection = connection; // Guardar la conexión
-    }
+    private static final Set<String> IGNORED_TABLES = new HashSet<>();
 
-    // Leer todas las tablas dinámicamente desde la base de datos
-    public void readTables() {
-        ResultSet tables = null;
-
-        try {
-            // Obtener los metadatos de la base de datos para listar las tablas
-            DatabaseMetaData metaData = connection.getMetaData();
-            tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
-
-            // Iterar sobre las tablas encontradas
-            while (tables.next()) {
-                String tableName = tables.getString("TABLE_NAME");
-
-                // Ignorar la tabla sys_config u otras tablas de configuración si es necesario
-                if (tableName.equalsIgnoreCase("sys_config")) {
-                    System.out.println("La tabla " + tableName + " es una tabla de configuración y se ha ignorado.");
-                } else {
-                    // Mostrar los datos de la tabla
-                    showTableData(tableName);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al leer las tablas: " + e.getMessage());
-        } finally {
-            // Cerrar el ResultSet de tablas
-            try {
-                if (tables != null) tables.close();
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar el ResultSet de tablas: " + e.getMessage());
-            }
+    static {
+        String[] ignored = {
+            "pma__bookmark", "pma__central_columns", "pma__column_info", "pma__designer_settings",
+            "pma__export_templates", "pma__favorite", "pma__history", "pma__navigationhiding",
+            "pma__pdf_pages", "pma__recent", "pma__relation", "pma__savedsearches", "pma__table_coords",
+            "pma__table_info", "pma__table_uiprefs", "pma__tracking", "pma__userconfig",
+            "pma__usergroups", "pma__users", "sys_config", "sys_created", "sys_updated"
+        };
+        for (String table : ignored) {
+            IGNORED_TABLES.add(table.toLowerCase());
         }
     }
 
-    // Mostrar los datos de una tabla específica
+    public DataReader(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void readTables() {
+        System.out.println("🔍 Iniciando la lectura de tablas...");
+        try (ResultSet tables = connection.getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
+                System.out.println("📌 Revisando tabla: " + tableName);
+
+                if (isIgnoredTable(tableName)) {
+                    System.out.println("❌ Tabla ignorada: " + tableName);
+                    continue;
+                }
+
+                if (!tableExists(tableName)) {
+                    System.out.println("⚠️ Tabla no accesible o no existe: " + tableName);
+                    continue;
+                }
+
+                System.out.println("✅ Procesando tabla: " + tableName);
+                showTableData(tableName);
+            }
+        } catch (SQLException e) {
+            System.out.println("⚠️ Error al leer las tablas: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isIgnoredTable(String tableName) {
+        return IGNORED_TABLES.contains(tableName.toLowerCase());
+    }
+
+    private boolean tableExists(String tableName) {
+        try (ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
+            return tables.next();
+        } catch (SQLException e) {
+            System.out.println("❌ Error verificando existencia de tabla: " + tableName);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public void showTableData(String tableName) {
-        Statement statement = null;
-        ResultSet resultSet = null;
+        System.out.println("📌 Intentando leer datos de la tabla: " + tableName);
+        String query = "SELECT * FROM " + tableName;
+        try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(query)) {
 
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM " + tableName);
-
-            System.out.println("Tabla: " + tableName);
+            System.out.println("🔹 Datos de la tabla: " + tableName);
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            // Imprimir los nombres de las columnas
             for (int i = 1; i <= columnCount; i++) {
                 System.out.print(metaData.getColumnName(i) + "\t");
             }
             System.out.println();
 
-            // Imprimir los datos de las filas
+            boolean hasData = false;
             while (resultSet.next()) {
+                hasData = true;
                 for (int i = 1; i <= columnCount; i++) {
                     System.out.print(resultSet.getString(i) + "\t");
                 }
                 System.out.println();
             }
 
-        } catch (SQLException e) {
-            // Manejar la excepción si ocurre un error al leer una tabla
-            System.out.println("Error al leer los datos de la tabla " + tableName);
-            System.out.println(e.getMessage());
-        } finally {
-            // Cerrar los recursos en el bloque finally
-            try {
-                if (resultSet != null) resultSet.close();
-                if (statement != null) statement.close();
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar los recursos: " + e.getMessage());
+            if (!hasData) {
+                System.out.println("⚠️ La tabla está vacía.");
             }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error al leer datos de la tabla: " + tableName + " -> " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

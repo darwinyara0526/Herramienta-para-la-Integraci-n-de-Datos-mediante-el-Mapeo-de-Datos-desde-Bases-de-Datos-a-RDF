@@ -1,0 +1,21 @@
+# Ignorar archivos y carpetas generadas por Maven
+target/
+
+# Ignorar archivos de compilación
+*.class
+*.jar
+*.war
+*.ear
+
+# Archivos de logs
+test-reports/
+*.log
+
+# Configuraciones de entorno
+*.env
+
+# Archivos de NetBeans y Eclipse
+nbproject/private/
+.classpath
+.project
+.settings/

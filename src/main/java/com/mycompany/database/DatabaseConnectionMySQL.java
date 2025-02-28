@@ -6,9 +6,10 @@ import java.sql.SQLException;
 
 public class DatabaseConnectionMySQL implements DatabaseConnection {
     // Parámetros de conexión
-    private static final String URL = "jdbc:mysql://127.0.0.1:3306/proyecto"; // Cambiado el host, puerto y base de datos
+
+    private static final String URL = "jdbc:mysql://127.0.0.1:3306/proyecto?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC";
     private static final String USER = "root"; // Usuario root
-    private static final String PASSWORD = "1familiayara"; // Contraseña
+    private static final String PASSWORD = ""; // Contraseña
 
     @Override
     public Connection connect() throws SQLException {
