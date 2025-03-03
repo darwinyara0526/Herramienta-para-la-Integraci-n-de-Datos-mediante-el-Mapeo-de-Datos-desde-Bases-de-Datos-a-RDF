@@ -2,34 +2,74 @@ package com.mycompany.rdfintegration;
 
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.nio.file.Paths;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+
+import java.io.*;
 
 public class RDFIntegrator {
 
-    public void integrateAndExport(String mysqlRDFPath, String postgresRDFPath) {
+    private Model unifiedModel;
+
+    public RDFIntegrator() {
+        this.unifiedModel = ModelFactory.createDefaultModel();
+    }
+
+    public void integrateRDF(String mysqlRDFPath, String postgresRDFPath) {
         try {
-            // Leer los archivos RDF de MySQL y PostgreSQL y unificarlos en un solo modelo
-            Model unifiedModel = ModelFactory.createDefaultModel();
             unifiedModel.read(mysqlRDFPath);
             unifiedModel.read(postgresRDFPath);
+            System.out.println("Modelos RDF integrados correctamente.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            // Consultar el modelo unificado con SPARQL (ejemplo simple)
-            String sparqlQuery = "SELECT ?subject ?predicate ?object WHERE { ?subject ?predicate ?object } LIMIT 10";
-            Query query = QueryFactory.create(sparqlQuery);
-            try (QueryExecution qexec = QueryExecutionFactory.create(query, unifiedModel)) {
-                ResultSet results = qexec.execSelect();
-                ResultSetFormatter.out(System.out, results, query);
+    public void queryRDF() {
+        String sparqlQuery = "SELECT ?subject ?predicate ?object WHERE { ?subject ?predicate ?object } LIMIT 10";
+        Query query = QueryFactory.create(sparqlQuery);
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, unifiedModel)) {
+            ResultSet results = qexec.execSelect();
+            ResultSetFormatter.out(System.out, results, query);
+        }
+    }
+
+    public void exportToRDFXML(String outputPath) {
+        try (OutputStream out = new FileOutputStream(outputPath)) {
+            unifiedModel.write(out, "RDF/XML");
+            System.out.println("Exportado a RDF/XML: " + outputPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportToCSV(String outputPath) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath))) {
+            StmtIterator iter = unifiedModel.listStatements();
+            writer.write("Subject,Predicate,Object\n");
+            while (iter.hasNext()) {
+                Statement stmt = iter.nextStatement();
+                writer.write(stmt.getSubject() + "," + stmt.getPredicate() + "," + stmt.getObject() + "\n");
             }
+            System.out.println("Exportado a CSV: " + outputPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            // Exportar el modelo unificado a un archivo RDF/XML
-            String outputUnifiedRDFPath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "unified_output.rdf").toString();
-            try (OutputStream out = new FileOutputStream(outputUnifiedRDFPath)) {
-                unifiedModel.write(out, "RDF/XML");
-                System.out.println("Modelo RDF unificado exportado a: " + outputUnifiedRDFPath);
-            }
+    public void exportToJSON(String outputPath) {
+        try (OutputStream out = new FileOutputStream(outputPath)) {
+            RDFDataMgr.write(out, unifiedModel, RDFFormat.JSONLD);
+            System.out.println("Exportado a JSON: " + outputPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void exportToTTL(String outputPath) {
+        try (OutputStream out = new FileOutputStream(outputPath)) {
+            RDFDataMgr.write(out, unifiedModel, RDFFormat.TURTLE);
+            System.out.println("Exportado a TTL: " + outputPath);
         } catch (Exception e) {
             e.printStackTrace();
         }

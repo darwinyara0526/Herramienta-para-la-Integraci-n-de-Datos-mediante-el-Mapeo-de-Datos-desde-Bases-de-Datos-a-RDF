@@ -11,7 +11,7 @@ public class PredicateMapper {
 
     static {
         COLUMN_PREDICATES.put("nombre", "foaf:name");
-        COLUMN_PREDICATES.put("email", "foaf:mbox");
+        COLUMN_PREDICATES.put("email", "ex:correo"); // Corrección de prefijo
         COLUMN_PREDICATES.put("telefono", "foaf:phone");
         COLUMN_PREDICATES.put("direccion", "schema:address");
         COLUMN_PREDICATES.put("ciudad", "schema:addressLocality");
@@ -22,7 +22,8 @@ public class PredicateMapper {
         COLUMN_PREDICATES.put("descripcion", "schema:description");
         COLUMN_PREDICATES.put("id", "dct:identifier");
         COLUMN_PREDICATES.put("url", "schema:url");
-        COLUMN_PREDICATES.put("categoria", "schema:category");
+        COLUMN_PREDICATES.put("categoria", "ex:id_categoria"); // Corrección en la referencia de categoría
+        COLUMN_PREDICATES.put("sexo", "ex:sexo");
     }
 
     public static String getPredicate(String columnName, String sqlType) {
@@ -43,7 +44,7 @@ public class PredicateMapper {
         if (NUMERIC_TYPES.contains(lowerType)) return "schema:price";
         if (INT_TYPES.contains(lowerType)) return "schema:inventoryLevel";
 
-        return "ex:" + columnName;
+        return "ex:" + columnName.replace("_", ""); // Remueve guiones bajos para consistencia
     }
 
     public static String getClassForTable(String tableName) {
@@ -57,8 +58,10 @@ public class PredicateMapper {
             return "schema:Order";
         } else if (lowerTable.contains("empresa") || lowerTable.contains("compania")) {
             return "schema:Organization";
+        } else if (lowerTable.contains("categoria")) {
+            return "schema:Category";
         }
 
-        return "ex:" + tableName;
+        return "ex:" + tableName.replace("_", "");
     }
 }

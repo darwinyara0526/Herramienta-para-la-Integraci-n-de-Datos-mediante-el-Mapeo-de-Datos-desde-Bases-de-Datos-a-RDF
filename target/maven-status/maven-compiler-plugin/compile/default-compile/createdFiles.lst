@@ -1,13 +1,14 @@
 com\mycompany\database\DatabaseConnection.class
 com\mycompany\filegeneration\PredicateMapper.class
 com\mycompany\filegeneration\R2RMLGenerator.class
-com\mycompany\interfaces\MainInterface.class
+com\mycompany\rdfintegration\RDFtoCSVConverter.class
 com\mycompany\database\DatabaseConnectionPostgreSQL.class
 com\mycompany\rdfintegration\RDFIntegrator.class
 NewFXMain.class
-com\mycompany\interfaces\WelcomeScreen.class
 com\mycompany\proyectov2\Main.class
 com\mycompany\filegeneration\RDFConverter.class
+com\mycompany\rdfintegration\RDFtoJSONConverter.class
 NewFXMain$1.class
 com\mycompany\database\DatabaseConnectionMySQL.class
 com\mycompany\filegeneration\DataReader.class
+com\mycompany\rdfintegration\RDFtoHTMLConverter.class

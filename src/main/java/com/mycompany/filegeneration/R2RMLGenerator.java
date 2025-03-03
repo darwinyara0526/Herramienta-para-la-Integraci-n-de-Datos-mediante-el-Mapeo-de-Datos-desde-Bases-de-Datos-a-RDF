@@ -27,7 +27,6 @@ public class R2RMLGenerator {
             ResultSet tables = metaData.getTables(null, null, "%", types);
 
             try (FileWriter writer = new FileWriter(outputFilePath, java.nio.charset.StandardCharsets.UTF_8)) {
-                // Escribir los prefijos
                 writer.write("@prefix ex: <http://example.com/schema/> .\n");
                 writer.write("@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n");
                 writer.write("@prefix schema: <https://schema.org/> .\n");
@@ -56,9 +55,11 @@ public class R2RMLGenerator {
 
                         while (resultSet.next()) {
                             String primaryKeyValue = resultSet.getString(primaryKeyColumn);
-                            String subject = "ex:" + escapeIdentifier(tableName) + "_" + primaryKeyValue;
+                            String subject = "ex:" + escapeIdentifier(tableName) + "_" + escapeIdentifier(primaryKeyValue);
 
                             writer.write(subject + " a " + rdfClass + " ;\n");
+
+                            boolean firstPredicate = true;
 
                             for (int i = 1; i <= columnCount; i++) {
                                 String columnName = rsMetaData.getColumnName(i);
@@ -69,10 +70,19 @@ public class R2RMLGenerator {
                                     String predicate = PredicateMapper.getPredicate(columnName, sqlType);
                                     String rdfDataType = getRDFDataType(sqlType);
                                     columnValue = formatValue(sqlType, columnValue);
-                                    writer.write("    " + predicate + " \"" + columnValue + "\"^^" + rdfDataType + " ;\n");
+
+                                    if (!firstPredicate) {
+                                        writer.write("    ");
+                                    }
+                                    writer.write(predicate + " \"" + escapeLiteral(columnValue) + "\"^^" + rdfDataType);
+
+                                    firstPredicate = false;
+                                    if (i < columnCount) {
+                                        writer.write(" ;\n");
+                                    }
                                 }
                             }
-                            writer.write(".\n\n");
+                            writer.write(" .\n\n");
                         }
                     }
                 }
@@ -137,25 +147,27 @@ public class R2RMLGenerator {
         if (sqlType.equalsIgnoreCase("date")) {
             try {
                 LocalDate date = LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                return date.toString();  // Retorna en formato correcto yyyy-MM-dd
+                return date.toString();
             } catch (Exception e) {
                 System.err.println("Error parsing date: " + value);
-                return value; // Retorna el valor original si hay error
             }
         } else if (sqlType.equalsIgnoreCase("datetime") || sqlType.equalsIgnoreCase("timestamp")) {
             try {
                 LocalDateTime dateTime = LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);  // Retorna yyyy-MM-ddTHH:mm:ss
+                return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             } catch (Exception e) {
                 System.err.println("Error parsing datetime: " + value);
-                return value;
             }
         }
         return value;
     }
 
     private String escapeIdentifier(String identifier) {
-        return identifier.replaceAll("[\"\\\\]", "\\\\$0").replace(" ", "_");
+        return identifier.replaceAll("[^a-zA-Z0-9_]", "_");
+    }
+
+    private String escapeLiteral(String literal) {
+        return literal.replace("\"", "\\\"");
     }
 
     private String getRDFClass(String tableName) {
