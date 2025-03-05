@@ -1,0 +1,4 @@
+ID,Nombre,Apellido,Correo,Contraseña,Rol,Área
+1,Juan,Pérez,correoadmin@gmail.com,user123,admin,TI
+2,Marta,López,correoregistrado@gmail.com,user789,registrado,Marketing
+3,Carlos,Gómez,correoinvitado@gmail.com,guest,invitado,--

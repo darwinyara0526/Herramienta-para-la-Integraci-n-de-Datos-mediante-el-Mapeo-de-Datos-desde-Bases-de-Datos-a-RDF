@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mycompany.gui.controllers.AdminController"
+            stylesheets="@/com/mycompany/styles/admin.css">
+
+    <!-- Menú Superior -->
+    <top>
+        <HBox spacing="20" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: #2C3E50; -fx-padding: 15px;">
+            <Label fx:id="nombreAdminLabel" text="Admin"
+                   style="-fx-text-fill: white; -fx-font-size: 18px;"/>
+            <Label fx:id="areaLabel" text="Área: TI"
+                   style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+            <Button text="Cerrar Sesión"
+                    style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-padding: 10px;"
+                    onAction="#cerrarSesion"/>
+        </HBox>
+    </top>
+
+    <!-- Menú de Navegación (Izquierda) -->
+    <left>
+        <VBox spacing="15" alignment="TOP_CENTER" VBox.vgrow="ALWAYS"
+              style="-fx-background-color: #34495E; -fx-padding: 20px; -fx-pref-width: 250px;">
+            <Label text="Panel de Administración"
+                   style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Button text="Gestionar Usuarios" style="-fx-pref-width: 200px;"/>
+            <Button text="Ver Reportes" style="-fx-pref-width: 200px;"/>
+            <Button text="Ajustes del Sistema" style="-fx-pref-width: 200px;"/>
+        </VBox>
+    </left>
+
+<!-- Contenido Principal -->
+    <center>
+        <VBox spacing="20" alignment="TOP_CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
+              styleClass="contenido-principal">
+        
+            <!-- Título principal -->
+            <Label text="Proceso de Integración" styleClass="titulo-principal"/>
+
+            <!-- Zona de arrastre de archivos -->
+            <VBox fx:id="zonaArrastre" spacing="10" alignment="CENTER"
+                  styleClass="zona-arrastre">
+                <Label text="Arrastre los datos aquí" styleClass="texto-arrastre"/>
+            </VBox>
+
+            <!-- Bloques de selección de archivos -->
+            <HBox spacing="40" alignment="CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+                
+                <!-- Área izquierda (Archivos seleccionados) -->
+                <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
+                      styleClass="bloque-izquierdo">
+                    <Label text="Archivos Seleccionados" styleClass="titulo-bloque"/>
+                    <ListView fx:id="listaArchivos" styleClass="lista"/>
+                </VBox>
+                
+                <!-- Área derecha (Tablas disponibles) -->
+                <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
+                      styleClass="bloque-derecho">
+                    <Label text="Tablas Disponibles" styleClass="titulo-bloque"/>
+                    <ListView fx:id="listaTablas" styleClass="lista"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- Seguimiento de integración -->
+            <VBox spacing="10" alignment="CENTER">
+                <Label text="Seguimiento de Integración" styleClass="titulo-bloque"/>
+                <ProgressBar fx:id="progresoIntegracion" styleClass="barra-progreso"/>
+            </VBox>
+
+            <!-- Botón de integración -->
+            <Button text="Iniciar Integración" fx:id="botonIntegrar"
+                    styleClass="boton-integrar" onAction="#iniciarIntegracion"/>
+        
+        </VBox>
+    </center>
+
+</BorderPane>

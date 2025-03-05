@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.image.ImageView?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mycompany.gui.controllers.LoginController"
+            stylesheets="@../styles/login.css">
+
+    <HBox fx:id="mainContainer" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" 
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        
+        <VBox fx:id="leftPane" HBox.hgrow="ALWAYS" spacing="15" alignment="CENTER"
+              xmlns="http://javafx.com/javafx"
+              xmlns:fx="http://javafx.com/fxml"
+              stylesheets="@../styles/login.css">
+
+            <!-- Título -->
+            <Label text="INICIAR SESIÓN" styleClass="title-label"/>
+
+            <!-- Campo de Correo Electrónico -->
+            <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="250">
+                <Label text="Correo Electrónico" styleClass="input-label"/>
+                <TextField fx:id="emailField" promptText="Introduce tu correo"/>
+            </VBox>
+
+            <!-- Campo de Contraseña -->
+            <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="250">
+                <Label text="Contraseña" styleClass="input-label"/>
+                <PasswordField fx:id="passwordField" promptText="Introduce tu contraseña"/>
+            </VBox>
+
+            <!-- Botón de Iniciar Sesión -->
+            <Button fx:id="loginButton" text="Iniciar Sesión" styleClass="login-button"/>
+
+            <!-- Opciones Adicionales -->
+            <HBox spacing="10" alignment="CENTER">
+                <Hyperlink text="Registrarse" fx:id="registerLink" styleClass="link"/>
+                <Hyperlink text="Ingresar como invitado" fx:id="guestLink" styleClass="link"/>
+            </HBox>
+
+            <Hyperlink text="Olvidé mi contraseña" fx:id="forgotPasswordLink" styleClass="link"/>
+
+        </VBox>
+
+
+        <VBox fx:id="rightPane" HBox.hgrow="ALWAYS" alignment="CENTER">
+    
+            <!-- Imagen ocupa todo el espacio disponible -->
+            <ImageView fx:id="toolImage" preserveRatio="true" VBox.vgrow="ALWAYS"/>
+
+
+            <!-- Botón de descarga abajo -->
+            <Button fx:id="downloadGuideButton" text="Descargar Guía" 
+                    styleClass="download-button"/>
+    
+        </VBox>
+
+
+    </HBox>
+
+</AnchorPane>
+
+

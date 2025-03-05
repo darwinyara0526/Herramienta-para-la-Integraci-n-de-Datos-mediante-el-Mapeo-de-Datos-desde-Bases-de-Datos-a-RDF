@@ -1,0 +1,89 @@
+#mainContainer {
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
+}
+
+/* Fondo del panel izquierdo */
+#leftPane {
+    -fx-background-color: #1e1e2f; /* Azul oscuro */
+    -fx-padding: 30px;
+    -fx-border-radius: 10px;
+}
+
+/* Título */
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+/* Estilos de los campos de entrada */
+.input-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #cccccc;
+}
+
+.text-field, .password-field {
+    -fx-pref-width: 250px;
+    -fx-pref-height: 35px;
+    -fx-background-color: #2c2c3e;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #4a4a6a;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #0078d7; /* Azul brillante */
+}
+
+/* Botón de inicio de sesión */
+.login-button {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 250px;
+    -fx-pref-height: 40px;
+    -fx-background-radius: 5px;
+}
+
+.login-button:hover {
+    -fx-background-color: #005bb5;
+}
+
+/* Estilos de los enlaces */
+.link {
+    -fx-text-fill: #00bfff;
+    -fx-font-size: 13px;
+}
+
+.link:hover {
+    -fx-underline: true;
+}
+
+
+
+/* Rightpane*/
+
+
+/* Fondo del panel derecho */
+#rightPane {
+    -fx-background-color: #f4f4f4; /* Fondo claro */
+    -fx-padding: 30px;
+}
+
+/* Botón de descarga */
+.download-button {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 180px;
+    -fx-pref-height: 40px;
+    -fx-background-radius: 5px;
+}
+
+.download-button:hover {
+    -fx-background-color: #005bb5;
+}
