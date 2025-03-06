@@ -1,3 +1,4 @@
+com\mycompany\database\DatabaseConfig.class
 com\mycompany\gui\models\Usuario.class
 com\mycompany\rdfintegration\RDFtoCSVConverter.class
 com\mycompany\database\DatabaseConnectionPostgreSQL.class
@@ -8,6 +9,7 @@ com\mycompany\gui\controllers\DatabaseConfigController.class
 com\mycompany\filegeneration\IntegrationHandler.class
 com\mycompany\filegeneration\RDFConverter.class
 com\mycompany\database\DatabaseConnectionMySQL.class
+com\mycompany\database\DatabaseConfigHandler.class
 com\mycompany\rdfintegration\RDFtoHTMLConverter.class
 com\mycompany\database\DatabaseConnection.class
 com\mycompany\filegeneration\PredicateMapper.class

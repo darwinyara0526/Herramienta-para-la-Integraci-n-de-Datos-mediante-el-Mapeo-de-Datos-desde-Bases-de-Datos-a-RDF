@@ -5,16 +5,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnectionMySQL implements DatabaseConnection {
-    // Parámetros de conexión
+    private final String url;
+    private final String user;
+    private final String password;
 
-    private static final String URL = "jdbc:mysql://127.0.0.1:3306/proyecto?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC";
-    private static final String USER = "root"; // Usuario root
-    private static final String PASSWORD = ""; // Contraseña
+    public DatabaseConnectionMySQL(String host, String puerto, String usuario, String password, String nombreBD) {
+        this.url = "jdbc:mysql://" + host + ":" + puerto + "/" + nombreBD + "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC";
+        this.user = usuario;
+        this.password = password;
+    }
 
     @Override
     public Connection connect() throws SQLException {
-        // Intenta establecer una conexión a la base de datos
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(url, user, password);
     }
 
     @Override
@@ -29,7 +32,6 @@ public class DatabaseConnectionMySQL implements DatabaseConnection {
         }
     }
 
-    // Implementación del nuevo método getDatabaseType
     @Override
     public String getDatabaseType() {
         return "MySQL";

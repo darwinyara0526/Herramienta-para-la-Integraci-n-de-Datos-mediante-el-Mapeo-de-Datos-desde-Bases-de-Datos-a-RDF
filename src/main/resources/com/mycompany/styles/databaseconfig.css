@@ -7,9 +7,12 @@
 
 /* Título principal */
 .titulo {
-    -fx-font-size: 24px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #2C3E50;
+    -fx-padding: 5px 0;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-color: #BDC3C7;
 }
 
 /* Contenedor principal */
@@ -20,12 +23,14 @@
     -fx-border-radius: 10px;
     -fx-padding: 15px;
     -fx-spacing: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 2, 2);
 }
 
 /* Etiquetas */
 .label {
     -fx-font-size: 14px;
     -fx-text-fill: #34495E;
+    -fx-font-weight: bold;
 }
 
 /* ComboBox */
@@ -34,32 +39,100 @@
     -fx-background-color: #FFFFFF;
     -fx-border-color: #BDC3C7;
     -fx-border-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.combo-box:hover {
+    -fx-border-color: #7F8C8D;
+}
+
+.combo-box:focused {
+    -fx-border-color: #2980B9;
+    -fx-background-color: #FDFEFE;
 }
 
 /* Campos de texto */
-.text-field {
+.text-field, .password-field {
     -fx-pref-width: 250px;
     -fx-background-color: #FFFFFF;
     -fx-border-color: #BDC3C7;
     -fx-border-radius: 5px;
     -fx-padding: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 2, 0, 1, 1);
 }
 
-/* Botón de conexión */
-.boton-conectar {
-    -fx-background-color: #3498DB;
-    -fx-text-fill: white;
+.text-field:hover, .password-field:hover {
+    -fx-border-color: #7F8C8D;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #2980B9;
+    -fx-background-color: #FDFEFE;
+}
+
+/* Botones */
+.button {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-padding: 10px 15px;
-    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 3, 0, 2, 2);
+}
+
+.boton-conectar {
+    -fx-background-color: #27AE60;
+    -fx-text-fill: white;
 }
 
 .boton-conectar:hover {
-    -fx-background-color: #2980B9;
+    -fx-background-color: #229954;
 }
 
 .boton-conectar:pressed {
+    -fx-background-color: #1E8449;
+}
+
+.boton-guardar {
+    -fx-background-color: #2980B9;
+    -fx-text-fill: white;
+}
+
+.boton-guardar:hover {
+    -fx-background-color: #2471A3;
+}
+
+.boton-guardar:pressed {
     -fx-background-color: #1F618D;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: #BDC3C7;
+    -fx-border-radius: 5px;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Contenedor de conexiones guardadas */
+#configContainer {
+    -fx-spacing: 5px;
+}
+
+/* Estilos para los bloques de configuración */
+.config-block {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #BDC3C7;
+    -fx-border-radius: 8px;
+    -fx-padding: 10px;
+    -fx-spacing: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 3, 0, 2, 2);
+}
+
+.config-block:hover {
+    -fx-background-color: #F8F9F9;
+    -fx-border-color: #7F8C8D;
 }

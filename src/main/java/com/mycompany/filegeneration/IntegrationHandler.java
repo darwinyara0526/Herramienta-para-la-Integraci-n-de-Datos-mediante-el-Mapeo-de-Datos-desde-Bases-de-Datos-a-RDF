@@ -10,16 +10,33 @@ import java.sql.Connection;
 public class IntegrationHandler {
 
     public void executeIntegration() {
-        // Configuración de rutas de salida para MySQL y PostgreSQL
+        // Datos de conexión - Reemplaza estos valores con los correctos
+        String hostMySQL = "127.0.0.1";
+        String puertoMySQL = "3306";
+        String usuarioMySQL = "root";
+        String passwordMySQL = "";
+        String nombreBDMySQL = "proyecto";
+
+        String hostPostgreSQL = "localhost";
+        String puertoPostgreSQL = "5432";
+        String usuarioPostgreSQL = "postgres";
+        String passwordPostgreSQL = "1familiayara";
+        String nombreBDPostgreSQL = "productos";
+
+        // Crear instancias de conexión con los parámetros correctos
+        DatabaseConnectionMySQL mysqlConnection = new DatabaseConnectionMySQL(hostMySQL, puertoMySQL, usuarioMySQL, passwordMySQL, nombreBDMySQL);
+        DatabaseConnectionPostgreSQL postgresConnection = new DatabaseConnectionPostgreSQL(hostPostgreSQL, puertoPostgreSQL, usuarioPostgreSQL, passwordPostgreSQL, nombreBDPostgreSQL);
+
+        // Configuración de rutas de salida
         String mysqlTurtlePath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "mysql_output.ttl").toString();
         String mysqlRDFPath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "mysql_output.rdf").toString();
 
         String postgresTurtlePath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "postgres_output.ttl").toString();
         String postgresRDFPath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", "postgres_output.rdf").toString();
 
-        // Procesar bases de datos y generar RDF
-        processDatabase(new DatabaseConnectionMySQL(), mysqlTurtlePath, mysqlRDFPath);
-        processDatabase(new DatabaseConnectionPostgreSQL(), postgresTurtlePath, postgresRDFPath);
+        // Procesar bases de datos
+        processDatabase(mysqlConnection, mysqlTurtlePath, mysqlRDFPath);
+        processDatabase(postgresConnection, postgresTurtlePath, postgresRDFPath);
 
         // Integrar RDFs de MySQL y PostgreSQL
         RDFIntegrator integrator = new RDFIntegrator();
@@ -36,7 +53,8 @@ public class IntegrationHandler {
     }
 
     /**
-     * Procesa una base de datos específica generando los archivos R2RML (TTL) y RDF
+     * Procesa una base de datos específica generando los archivos R2RML (TTL) y
+     * RDF
      */
     private void processDatabase(DatabaseConnection dbConnection, String outputTurtlePath, String outputRDFPath) {
         Connection connection = null;

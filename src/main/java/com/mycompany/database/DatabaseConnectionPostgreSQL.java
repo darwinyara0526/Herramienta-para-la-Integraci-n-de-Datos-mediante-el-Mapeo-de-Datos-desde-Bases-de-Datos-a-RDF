@@ -5,13 +5,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnectionPostgreSQL implements DatabaseConnection {
-    private static final String URL = "jdbc:postgresql://localhost:5432/productos"; // Cambia según tus credenciales
-    private static final String USER = "postgres"; // Cambia según tus credenciales
-    private static final String PASSWORD = "1familiayara"; // Cambia según tus credenciales
+    private final String url;
+    private final String user;
+    private final String password;
+
+    public DatabaseConnectionPostgreSQL(String host, String puerto, String usuario, String password, String nombreBD) {
+        this.url = "jdbc:postgresql://" + host + ":" + puerto + "/" + nombreBD;
+        this.user = usuario;
+        this.password = password;
+    }
 
     @Override
     public Connection connect() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(url, user, password);
     }
 
     @Override
@@ -26,9 +32,8 @@ public class DatabaseConnectionPostgreSQL implements DatabaseConnection {
         }
     }
 
-    // Implementación del nuevo método getDatabaseType
     @Override
     public String getDatabaseType() {
-        return "PostgreSQL"; // Devuelve el tipo de base de datos
+        return "PostgreSQL";
     }
 }
