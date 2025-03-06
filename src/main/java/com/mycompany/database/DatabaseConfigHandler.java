@@ -5,7 +5,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.TransferMode;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,16 +33,17 @@ public class DatabaseConfigHandler {
         System.out.println("🔹 Guardando nueva configuración: " + config.getNombreBD());
         databaseConfigs.add(config);
         saveConfigsToFile();
-        addConfigBlock(config);
+        loadConfigs();
     }
 
-    private void loadConfigs() {
+    public void loadConfigs() {
         ObjectMapper mapper = new ObjectMapper();
         File file = new File(CONFIG_FILE);
         if (file.exists()) {
             try {
                 DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
                 databaseConfigs.clear();
+                configContainer.getChildren().clear();
                 for (DatabaseConfig config : configs) {
                     databaseConfigs.add(config);
                     addConfigBlock(config);
@@ -72,8 +72,7 @@ public class DatabaseConfigHandler {
     public void deleteConfig(DatabaseConfig configToDelete) {
         if (databaseConfigs.removeIf(config -> config.equals(configToDelete))) {
             saveConfigsToFile();
-            configContainer.getChildren().clear();
-            databaseConfigs.forEach(this::addConfigBlock);
+            loadConfigs();
             System.out.println("✔ Configuración eliminada: " + configToDelete.getNombreBD());
         } else {
             System.out.println("⚠ No se encontró la configuración para eliminar.");
@@ -81,7 +80,7 @@ public class DatabaseConfigHandler {
     }
 
     private void addConfigBlock(DatabaseConfig config) {
-        Button configBlock = new Button();
+        Button configBlock = new Button(config.getNombreBD());
         configBlock.getStyleClass().add("config-block");
 
         Image image = null;
@@ -97,12 +96,7 @@ public class DatabaseConfigHandler {
             icon.setFitWidth(24);
             icon.setFitHeight(24);
             configBlock.setGraphic(icon);
-        } else {
-            configBlock.setText("❌ " + config.getNombreBD());
         }
-
-        configBlock.setText(config.getNombreBD());
-        configBlock.setContentDisplay(javafx.scene.control.ContentDisplay.TOP);
 
         Button deleteButton = new Button("Eliminar");
         deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");

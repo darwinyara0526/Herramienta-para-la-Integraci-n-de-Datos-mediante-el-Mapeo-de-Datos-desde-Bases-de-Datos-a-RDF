@@ -16,6 +16,7 @@ import java.io.IOException;
 import com.mycompany.gui.models.Usuario;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import com.mycompany.database.DatabaseConfigHandler;
 
 public class AdminController {
 
@@ -27,6 +28,9 @@ public class AdminController {
 
     @FXML
     private VBox zonaArrastre;
+
+    @FXML
+    private VBox contenedorConfigs;
 
     @FXML
     private ListView<String> listaArchivos;
@@ -44,11 +48,17 @@ public class AdminController {
     private final ObservableList<String> archivos = FXCollections.observableArrayList();
     private final ObservableList<String> tablas = FXCollections.observableArrayList();
 
+    private DatabaseConfigHandler configHandler;
+
     @FXML
     public void initialize() {
         listaArchivos.setItems(archivos);
         listaTablas.setItems(tablas);
         configurarArrastreArchivos();
+
+        // Inicializar DatabaseConfigHandler para gestionar configuraciones
+        configHandler = new DatabaseConfigHandler(contenedorConfigs);
+        configHandler.loadConfigs(); // Cargar configuraciones al iniciar
     }
 
     public void setUsuario(Usuario usuario) {
@@ -122,8 +132,11 @@ public class AdminController {
             Stage stage = new Stage();
             stage.setTitle("Conectar a Base de Datos");
             stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal hasta que se cierre esta
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
+
+            // Recargar las configuraciones después de cerrar la ventana
+            configHandler.loadConfigs();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -28,6 +28,13 @@
             <Button text="Ver Reportes" styleClass="boton-menu"/>
             <Button text="Ajustes del Sistema" styleClass="boton-menu"/>
             <Button text="Agregar Base de Datos" styleClass="boton-menu" onAction="#abrirConexionBD"/>
+
+            <!-- Contenedor de configuraciones JSON -->
+            <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-configs">
+                <VBox fx:id="contenedorConfigs" spacing="10" alignment="TOP_CENTER"
+                      styleClass="contenedor-configs"/>
+            </ScrollPane>
+
         </VBox>
     </left>
 
@@ -35,7 +42,7 @@
     <center>
         <VBox spacing="20" alignment="TOP_CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
               styleClass="contenido-principal">
-        
+
             <!-- Título principal -->
             <Label text="Proceso de Integración" styleClass="titulo-principal"/>
 
@@ -47,14 +54,14 @@
 
             <!-- Bloques de selección de archivos -->
             <HBox spacing="40" alignment="CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
-                
+
                 <!-- Área izquierda (Archivos seleccionados) -->
                 <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
                       styleClass="bloque-izquierdo">
                     <Label text="Archivos Seleccionados" styleClass="titulo-bloque"/>
                     <ListView fx:id="listaArchivos" styleClass="lista"/>
                 </VBox>
-                
+
                 <!-- Área derecha (Tablas disponibles) -->
                 <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
                       styleClass="bloque-derecho">
@@ -73,7 +80,7 @@
             <!-- Botón de integración -->
             <Button text="Iniciar Integración" fx:id="botonIntegrar"
                     styleClass="boton-integrar" onAction="#iniciarIntegracion"/>
-        
+
         </VBox>
     </center>
 
