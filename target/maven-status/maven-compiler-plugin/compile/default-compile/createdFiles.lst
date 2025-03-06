@@ -4,6 +4,7 @@ com\mycompany\database\DatabaseConnectionPostgreSQL.class
 com\mycompany\rdfintegration\RDFIntegrator.class
 NewFXMain.class
 com\mycompany\proyectov2\Main.class
+com\mycompany\gui\controllers\DatabaseConfigController.class
 com\mycompany\filegeneration\IntegrationHandler.class
 com\mycompany\filegeneration\RDFConverter.class
 com\mycompany\database\DatabaseConnectionMySQL.class

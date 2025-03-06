@@ -3,7 +3,6 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -13,30 +12,26 @@
     <!-- Menú Superior -->
     <top>
         <HBox spacing="20" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS"
-              style="-fx-background-color: #2C3E50; -fx-padding: 15px;">
-            <Label fx:id="nombreAdminLabel" text="Admin"
-                   style="-fx-text-fill: white; -fx-font-size: 18px;"/>
-            <Label fx:id="areaLabel" text="Área: TI"
-                   style="-fx-text-fill: white; -fx-font-size: 16px;"/>
-            <Button text="Cerrar Sesión"
-                    style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-padding: 10px;"
-                    onAction="#cerrarSesion"/>
+              styleClass="menu-superior">
+            <Label fx:id="nombreAdminLabel" text="Admin" styleClass="texto-menu"/>
+            <Label fx:id="areaLabel" text="Área: TI" styleClass="texto-menu"/>
+            <Button text="Cerrar Sesión" styleClass="boton-cerrar" onAction="#cerrarSesion"/>
         </HBox>
     </top>
 
     <!-- Menú de Navegación (Izquierda) -->
     <left>
         <VBox spacing="15" alignment="TOP_CENTER" VBox.vgrow="ALWAYS"
-              style="-fx-background-color: #34495E; -fx-padding: 20px; -fx-pref-width: 250px;">
-            <Label text="Panel de Administración"
-                   style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
-            <Button text="Gestionar Usuarios" style="-fx-pref-width: 200px;"/>
-            <Button text="Ver Reportes" style="-fx-pref-width: 200px;"/>
-            <Button text="Ajustes del Sistema" style="-fx-pref-width: 200px;"/>
+              styleClass="menu-lateral">
+            <Label text="Panel de Administración" styleClass="titulo-menu"/>
+            <Button text="Gestionar Usuarios" styleClass="boton-menu"/>
+            <Button text="Ver Reportes" styleClass="boton-menu"/>
+            <Button text="Ajustes del Sistema" styleClass="boton-menu"/>
+            <Button text="Agregar Base de Datos" styleClass="boton-menu" onAction="#abrirConexionBD"/>
         </VBox>
     </left>
 
-<!-- Contenido Principal -->
+    <!-- Contenido Principal -->
     <center>
         <VBox spacing="20" alignment="TOP_CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
               styleClass="contenido-principal">

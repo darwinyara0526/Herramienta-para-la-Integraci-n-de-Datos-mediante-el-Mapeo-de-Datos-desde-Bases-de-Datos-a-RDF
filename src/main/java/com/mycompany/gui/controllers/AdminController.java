@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import com.mycompany.gui.models.Usuario;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 
 public class AdminController {
 
@@ -107,6 +108,22 @@ public class AdminController {
             Stage stage = (Stage) nombreAdminLabel.getScene().getWindow();
             stage.setScene(new Scene(root, 600, 400));
             stage.setMaximized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void abrirConexionBD() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/view/DatabaseConfig.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Conectar a Base de Datos");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal hasta que se cierre esta
+            stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
         }
