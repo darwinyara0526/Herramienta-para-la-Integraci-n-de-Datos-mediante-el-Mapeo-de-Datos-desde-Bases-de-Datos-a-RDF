@@ -1,32 +1,14 @@
-/* Estilos del Menú Superior */
+/* Menú Superior */
 .menu-superior {
-    -fx-background-color: #2C3E50;
+    -fx-background-color: linear-gradient(to right, #2C3E50, #34495E);
     -fx-padding: 15px;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-color: #1F2C38;
 }
 
 .texto-menu {
     -fx-text-fill: white;
     -fx-font-size: 18px;
-}
-
-
-
-.boton-cerrar {
-    -fx-background-color: #E74C3C;
-    -fx-text-fill: white;
-    -fx-padding: 10px;
-}
-
-/* Estilos del Menú Lateral */
-.menu-lateral {
-    -fx-background-color: #34495E;
-    -fx-padding: 20px;
-    -fx-pref-width: 250px;
-}
-
-.titulo-menu {
-    -fx-text-fill: white;
-    -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-wrap-text: true;
     -fx-max-width: 200px;
@@ -34,55 +16,102 @@
     -fx-text-alignment: center;
 }
 
-.boton-menu {
-    -fx-pref-width: 200px;
+/* Botón de Cerrar Sesión */
+.boton-cerrar {
+    -fx-background-color: #E74C3C;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
 }
 
-/* Estilos del Contenido Principal */
-.contenido-principal {
+.boton-cerrar:hover {
+    -fx-background-color: #C0392B;
+}
+
+/* Menú Lateral */
+.menu-lateral {
+    -fx-background-color: #2C3E50;
     -fx-padding: 20px;
+    -fx-pref-width: 260px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
 }
 
+.titulo-menu {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+}
+
+/* Botones del Menú */
+.boton-menu {
+    -fx-pref-width: 220px;
+    -fx-padding: 12px;
+    -fx-background-color: #2980B9;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.boton-menu:hover {
+    -fx-background-color: #1F618D;
+}
+
+/* Scroll del Contenedor de Configuraciones */
+.scroll-configs {
+    -fx-background-color: transparent;
+    -fx-border-color: #BDC3C7;
+    -fx-border-width: 1px;
+    -fx-padding: 5px;
+}
+
+.contenedor-configs {
+    -fx-background-color: #ECF0F1;
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+}
+
+/* Contenido Principal */
+.contenido-principal {
+    -fx-padding: 30px;
+    -fx-background-color: #F8F9F9;
+}
+
+/* Título Principal */
 .titulo-principal {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
 }
 
 /* Zona de Arrastre */
 .zona-arrastre {
-    -fx-border-color: #3498DB;
-    -fx-border-width: 2px;
+    -fx-border-color: #2980B9;
+    -fx-border-width: 3px;
     -fx-border-style: dashed;
-    -fx-padding: 20px;
+    -fx-padding: 30px;
     -fx-background-color: #ECF0F1;
+    -fx-pref-width: 250px;
+    -fx-pref-height: 180px;
+    -fx-border-radius: 10px;
+}
+
+.zona-arrastre:hover {
+    -fx-background-color: #D5DBDB;
 }
 
 .texto-arrastre {
     -fx-font-size: 16px;
     -fx-text-fill: #2980B9;
-}
-
-/* Bloques de Selección */
-.bloque-izquierdo, .bloque-derecho {
-    -fx-padding: 10px;
-    -fx-background-color: #BDC3C7;
-    -fx-border-radius: 5px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
-}
-
-.titulo-bloque {
-    -fx-font-size: 18px;
     -fx-font-weight: bold;
-}
-
-.lista {
-    -fx-pref-width: 300px;
-    -fx-pref-height: 150px;
 }
 
 /* Barra de Progreso */
 .barra-progreso {
-    -fx-pref-width: 300px;
+    -fx-pref-width: 350px;
 }
 
 /* Botón de Integración */
@@ -90,17 +119,12 @@
     -fx-background-color: #27AE60;
     -fx-text-fill: white;
     -fx-font-size: 16px;
-    -fx-padding: 10px 20px;
+    -fx-padding: 12px 24px;
     -fx-border-radius: 5px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
 }
 
-/* Zona de Arrastre - Ampliada */
-.zona-arrastre {
-    -fx-border-color: #3498DB;
-    -fx-border-width: 2px;
-    -fx-border-style: dashed;
-    -fx-padding: 30px; /* Aumenta el espacio interno */
-    -fx-background-color: #ECF0F1;
-    -fx-pref-width: 350px; /* Anchura mayor */
-    -fx-pref-height: 200px; /* Altura mayor */
+.boton-integrar:hover {
+    -fx-background-color: #1E8449;
 }

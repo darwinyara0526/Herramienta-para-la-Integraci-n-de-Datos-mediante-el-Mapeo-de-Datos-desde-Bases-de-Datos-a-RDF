@@ -1,22 +1,18 @@
 package com.mycompany.gui.controllers;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.Parent;
-import javafx.fxml.FXMLLoader;
-import java.io.File;
-import java.io.IOException;
+import com.mycompany.database.DatabaseConfigHandler;
+import com.mycompany.gui.handlers.DragAndDropHandler;
 import com.mycompany.gui.models.Usuario;
+import javafx.fxml.FXML;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import com.mycompany.database.DatabaseConfigHandler;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+
+import java.io.IOException;
 
 public class AdminController {
 
@@ -30,6 +26,9 @@ public class AdminController {
     private VBox zonaArrastre;
 
     @FXML
+    private VBox zonaArrastre2;
+
+    @FXML
     private VBox contenedorConfigs;
 
     @FXML
@@ -39,18 +38,20 @@ public class AdminController {
     private Button botonIntegrar;
 
     private Usuario usuario;
-    private final ObservableList<String> archivos = FXCollections.observableArrayList();
-    private final ObservableList<String> tablas = FXCollections.observableArrayList();
-
     private DatabaseConfigHandler configHandler;
+    private DragAndDropHandler dragAndDropHandler;
 
     @FXML
     public void initialize() {
-        configurarArrastreArchivos();
-
-        // Inicializar DatabaseConfigHandler para gestionar configuraciones
+        // Inicializar el gestor de configuraciones de bases de datos
         configHandler = new DatabaseConfigHandler(contenedorConfigs);
-        configHandler.loadConfigs(); // Cargar configuraciones al iniciar
+        configHandler.loadConfigs(); // Cargar configuraciones guardadas
+
+        // Configurar el Drag and Drop
+        dragAndDropHandler = new DragAndDropHandler(configHandler);
+        dragAndDropHandler.enableDragAndDrop(zonaArrastre);
+        dragAndDropHandler.enableDragAndDrop(zonaArrastre2);
+        dragAndDropHandler.enableDragAndDrop(contenedorConfigs); // Habilitar en contenedorConfigs
     }
 
     public void setUsuario(Usuario usuario) {
@@ -67,39 +68,19 @@ public class AdminController {
         }
     }
 
-    private void configurarArrastreArchivos() {
-        zonaArrastre.setOnDragOver(event -> {
-            if (event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY);
-            }
-            event.consume();
-        });
-
-        zonaArrastre.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasFiles()) {
-                for (File file : db.getFiles()) {
-                    archivos.add(file.getName()); // Guarda solo el nombre del archivo
-                }
-            }
-            event.setDropCompleted(true);
-            event.consume();
-        });
-    }
-
     @FXML
     private void iniciarIntegracion() {
-        if (archivos.isEmpty()) {
-            mostrarAlerta("Error", "No hay archivos para integrar.");
+        if (configHandler.getDatabaseConfigs().isEmpty()) {
+            mostrarAlerta("Error", "No hay configuraciones de base de datos cargadas.");
             return;
         }
 
         progresoIntegracion.setProgress(0.1);
 
-        // Simulación de carga de tablas (se reemplazará con lógica real)
-        tablas.setAll("tabla_usuarios", "tabla_ventas", "tabla_productos");
-
+        // Simulación de carga de datos
+        System.out.println("Iniciando integración de datos...");
         progresoIntegracion.setProgress(1.0);
+        System.out.println("Integración finalizada.");
     }
 
     @FXML
