@@ -33,12 +33,6 @@ public class AdminController {
     private VBox contenedorConfigs;
 
     @FXML
-    private ListView<String> listaArchivos;
-
-    @FXML
-    private ListView<String> listaTablas;
-
-    @FXML
     private ProgressBar progresoIntegracion;
 
     @FXML
@@ -52,8 +46,6 @@ public class AdminController {
 
     @FXML
     public void initialize() {
-        listaArchivos.setItems(archivos);
-        listaTablas.setItems(tablas);
         configurarArrastreArchivos();
 
         // Inicializar DatabaseConfigHandler para gestionar configuraciones

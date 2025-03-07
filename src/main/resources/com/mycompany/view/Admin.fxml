@@ -38,7 +38,6 @@
         </VBox>
     </left>
 
-    <!-- Contenido Principal -->
     <center>
         <VBox spacing="20" alignment="TOP_CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
               styleClass="contenido-principal">
@@ -46,27 +45,19 @@
             <!-- Título principal -->
             <Label text="Proceso de Integración" styleClass="titulo-principal"/>
 
-            <!-- Zona de arrastre de archivos -->
-            <VBox fx:id="zonaArrastre" spacing="10" alignment="CENTER"
-                  styleClass="zona-arrastre">
-                <Label text="Arrastre los datos aquí" styleClass="texto-arrastre"/>
-            </VBox>
-
-            <!-- Bloques de selección de archivos -->
+            <!-- Contenedor para las dos zonas de arrastre -->
             <HBox spacing="40" alignment="CENTER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
 
-                <!-- Área izquierda (Archivos seleccionados) -->
-                <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
-                      styleClass="bloque-izquierdo">
-                    <Label text="Archivos Seleccionados" styleClass="titulo-bloque"/>
-                    <ListView fx:id="listaArchivos" styleClass="lista"/>
+                <!-- Zona de arrastre de archivos (izquierda) -->
+                <VBox fx:id="zonaArrastre" spacing="10" alignment="CENTER"
+                      styleClass="zona-arrastre">
+                    <Label text="Arrastre los datos aquí" styleClass="texto-arrastre"/>
                 </VBox>
 
-                <!-- Área derecha (Tablas disponibles) -->
-                <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS"
-                      styleClass="bloque-derecho">
-                    <Label text="Tablas Disponibles" styleClass="titulo-bloque"/>
-                    <ListView fx:id="listaTablas" styleClass="lista"/>
+                <!-- Zona de arrastre de archivos (derecha) -->
+                <VBox fx:id="zonaArrastre2" spacing="10" alignment="CENTER"
+                      styleClass="zona-arrastre">
+                    <Label text="Arrastre los datos aquí" styleClass="texto-arrastre"/>
                 </VBox>
 
             </HBox>
@@ -83,5 +74,6 @@
 
         </VBox>
     </center>
+
 
 </BorderPane>

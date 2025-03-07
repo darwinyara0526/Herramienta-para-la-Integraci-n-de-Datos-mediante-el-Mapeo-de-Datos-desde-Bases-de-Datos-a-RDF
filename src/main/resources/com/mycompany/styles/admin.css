@@ -30,8 +30,8 @@
     -fx-font-weight: bold;
     -fx-wrap-text: true;
     -fx-max-width: 200px;
-    -fx-alignment: center; 
-    -fx-text-alignment: center; 
+    -fx-alignment: center;
+    -fx-text-alignment: center;
 }
 
 .boton-menu {
@@ -92,4 +92,15 @@
     -fx-font-size: 16px;
     -fx-padding: 10px 20px;
     -fx-border-radius: 5px;
+}
+
+/* Zona de Arrastre - Ampliada */
+.zona-arrastre {
+    -fx-border-color: #3498DB;
+    -fx-border-width: 2px;
+    -fx-border-style: dashed;
+    -fx-padding: 30px; /* Aumenta el espacio interno */
+    -fx-background-color: #ECF0F1;
+    -fx-pref-width: 350px; /* Anchura mayor */
+    -fx-pref-height: 200px; /* Altura mayor */
 }
