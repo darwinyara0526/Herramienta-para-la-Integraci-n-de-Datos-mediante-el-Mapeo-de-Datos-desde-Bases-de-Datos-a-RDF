@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javafx.fxml.FXML;
 
 public class DatabaseConfigHandler {
 
@@ -140,6 +141,9 @@ public class DatabaseConfigHandler {
         setupDropHandler(zonaArrastre);
         setupDropHandler(zonaArrastre2);
     }
+
+    @FXML
+    private VBox zona;
 
     private void setupDropHandler(VBox zona) {
         zona.setOnDragOver(event -> {

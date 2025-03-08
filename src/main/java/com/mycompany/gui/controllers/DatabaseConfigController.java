@@ -2,9 +2,11 @@ package com.mycompany.gui.controllers;
 
 import com.mycompany.database.*;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -27,13 +29,18 @@ public class DatabaseConfigController {
 
     @FXML
     private void initialize() {
-        configHandler = new DatabaseConfigHandler(configContainer, zonaArrastre, zonaArrastre2);
+        if (zonaArrastre == null || zonaArrastre2 == null) {
+            System.err.println("⚠️ Error: zonaArrastre o zonaArrastre2 no están inicializados.");
+        } else {
+            configHandler = new DatabaseConfigHandler(configContainer, zonaArrastre, zonaArrastre2);
+        }
+
         tipoBDComboBox.getItems().addAll("MySQL", "PostgreSQL");
         if (guardarButton != null) {
-            guardarButton.setDisable(true); // Inicia deshabilitado
+            guardarButton.setDisable(true);
         }
         if (eliminarButton != null) {
-            eliminarButton.setVisible(false); // Se oculta inicialmente
+            eliminarButton.setVisible(false);
         }
     }
 
@@ -58,12 +65,6 @@ public class DatabaseConfigController {
                 puertoField.setText("1521");
             }
         }
-        if ("MySQL".equals(tipoBD)) {
-            hostField.setText("127.0.0.1");
-            usuarioField.setText("root");
-            passwordField.setText("");
-            nombreBDField.setText("proyecto");
-        }
     }
 
     @FXML
@@ -81,12 +82,9 @@ public class DatabaseConfigController {
         }
 
         DatabaseConnection dbConnection = switch (tipoBD) {
-            case "MySQL" ->
-                new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
-            case "PostgreSQL" ->
-                new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
-            default ->
-                null;
+            case "MySQL" -> new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
+            case "PostgreSQL" -> new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
+            default -> null;
         };
 
         if (dbConnection == null) {
