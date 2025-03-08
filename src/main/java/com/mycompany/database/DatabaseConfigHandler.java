@@ -107,6 +107,15 @@ public class DatabaseConfigHandler {
         }
 
         configBlock.setOnMouseClicked(event -> connectAndShowTables(config));
+
+        configBlock.setOnDragDetected(event -> {
+            Dragboard db = configBlock.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(config.getNombreBD());
+            db.setContent(content);
+            event.consume();
+        });
+
         configContainer.getChildren().add(configBlock);
         System.out.println("✔ Configuración añadida: " + config.getNombreBD());
     }
@@ -118,8 +127,8 @@ public class DatabaseConfigHandler {
 
     private void setupDropHandler(VBox zona) {
         zona.setOnDragOver(event -> {
-            if (event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            if (event.getGestureSource() instanceof Button || event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.MOVE);
             }
             event.consume();
         });
@@ -127,6 +136,7 @@ public class DatabaseConfigHandler {
         zona.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
+            
             if (db.hasFiles()) {
                 for (File file : db.getFiles()) {
                     if (file.getName().toLowerCase().endsWith(".json")) {
@@ -136,7 +146,15 @@ public class DatabaseConfigHandler {
                         System.out.println("⚠ Archivo no válido: " + file.getName());
                     }
                 }
+            } else if (db.hasString()) {
+                String configName = db.getString();
+                databaseConfigs.stream()
+                        .filter(config -> config.getNombreBD().equals(configName))
+                        .findFirst()
+                        .ifPresent(this::connectAndShowTables);
+                success = true;
             }
+
             event.setDropCompleted(success);
             event.consume();
         });

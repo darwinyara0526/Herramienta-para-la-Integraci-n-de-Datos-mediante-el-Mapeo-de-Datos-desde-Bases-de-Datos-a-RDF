@@ -1,9 +1,7 @@
 package com.mycompany.database;
 
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.sql.Connection;
@@ -18,7 +16,9 @@ public class DatabaseViewer {
     public static void showTables(DatabaseConfig config) {
         Stage stage = new Stage();
         VBox root = new VBox();
-        ListView<String> tableListView = new ListView<>();
+        CheckBox selectAllCheckBox = new CheckBox("Seleccionar todas");
+        ListView<CheckBox> tableListView = new ListView<>();
+        Button integrateButton = new Button("Integrar seleccionadas");
         
         DatabaseConnection connection;
         
@@ -37,7 +37,9 @@ public class DatabaseViewer {
         try (Connection conn = connection.connect()) {
             if (conn != null) {
                 List<String> tables = fetchTables(conn, config.getTipoBD());
-                tableListView.getItems().addAll(tables);
+                for (String table : tables) {
+                    tableListView.getItems().add(new CheckBox(table));
+                }
             } else {
                 showError("No se pudo establecer conexión con la base de datos.");
                 return;
@@ -47,7 +49,24 @@ public class DatabaseViewer {
             return;
         }
 
-        root.getChildren().add(tableListView);
+        selectAllCheckBox.setOnAction(event -> {
+            boolean selectAll = selectAllCheckBox.isSelected();
+            for (CheckBox checkBox : tableListView.getItems()) {
+                checkBox.setSelected(selectAll);
+            }
+        });
+        
+        integrateButton.setOnAction(event -> {
+            List<String> selectedTables = new ArrayList<>();
+            for (CheckBox checkBox : tableListView.getItems()) {
+                if (checkBox.isSelected()) {
+                    selectedTables.add(checkBox.getText());
+                }
+            }
+            System.out.println("Tablas seleccionadas: " + selectedTables);
+        });
+        
+        root.getChildren().addAll(selectAllCheckBox, tableListView, integrateButton);
         Scene scene = new Scene(root, 300, 400);
         stage.setScene(scene);
         stage.setTitle("Tablas en " + config.getNombreBD());
@@ -73,7 +92,7 @@ public class DatabaseViewer {
     }
 
     private static void showError(String message) {
-        Alert alert = new Alert(AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
