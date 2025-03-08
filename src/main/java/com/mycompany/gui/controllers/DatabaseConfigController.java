@@ -21,13 +21,13 @@ public class DatabaseConfigController {
     @FXML
     private Button guardarButton, eliminarButton;
     @FXML
-    private VBox configContainer;
+    private VBox configContainer, zonaArrastre, zonaArrastre2;
 
     private DatabaseConfigHandler configHandler;
 
     @FXML
     private void initialize() {
-        configHandler = new DatabaseConfigHandler(configContainer);
+        configHandler = new DatabaseConfigHandler(configContainer, zonaArrastre, zonaArrastre2);
         tipoBDComboBox.getItems().addAll("MySQL", "PostgreSQL");
         if (guardarButton != null) {
             guardarButton.setDisable(true); // Inicia deshabilitado

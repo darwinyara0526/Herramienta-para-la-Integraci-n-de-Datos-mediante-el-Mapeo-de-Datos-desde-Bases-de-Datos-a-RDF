@@ -1,7 +1,6 @@
 package com.mycompany.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.gui.controllers.TableViewWindow;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
@@ -9,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +16,16 @@ public class DatabaseConfigHandler {
 
     private static final String CONFIG_FILE = "data/database_config.json";
     private VBox configContainer;
+    private VBox zonaArrastre;
+    private VBox zonaArrastre2;
     private List<DatabaseConfig> databaseConfigs = new ArrayList<>();
 
-    public DatabaseConfigHandler(VBox configContainer) {
+    public DatabaseConfigHandler(VBox configContainer, VBox zonaArrastre, VBox zonaArrastre2) {
         this.configContainer = configContainer;
+        this.zonaArrastre = zonaArrastre;
+        this.zonaArrastre2 = zonaArrastre2;
         loadConfigs();
+        setupDragAndDrop();
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
@@ -90,63 +95,86 @@ public class DatabaseConfigHandler {
         Button configBlock = new Button(config.getNombreBD());
         configBlock.getStyleClass().add("config-block");
 
-        // Cargar imagen del icono
-        Image image = null;
         try {
             String imagePath = "/com/mycompany/images/json-icon.png";
-            image = new Image(getClass().getResource(imagePath).toExternalForm());
-        } catch (Exception e) {
-            System.out.println("⚠ No se pudo cargar la imagen del icono.");
-        }
-
-        if (image != null) {
+            Image image = new Image(getClass().getResource(imagePath).toExternalForm());
             ImageView icon = new ImageView(image);
             icon.setFitWidth(24);
             icon.setFitHeight(24);
             configBlock.setGraphic(icon);
+        } catch (Exception e) {
+            System.out.println("⚠ No se pudo cargar la imagen del icono.");
         }
 
-        // Habilitar arrastre
-        configBlock.setOnDragDetected(event -> {
-            Dragboard db = configBlock.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.putString(config.getNombreBD());
-            db.setContent(content);
-            event.consume();
-        });
-
-        Button deleteButton = new Button("Eliminar");
-        deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-        deleteButton.setOnAction(event -> deleteConfig(config));
-        deleteButton.setVisible(false);
-
-        configBlock.setOnMouseClicked(event -> deleteButton.setVisible(!deleteButton.isVisible()));
-
-        configContainer.getChildren().addAll(configBlock, deleteButton);
+        configBlock.setOnMouseClicked(event -> connectAndShowTables(config));
+        configContainer.getChildren().add(configBlock);
         System.out.println("✔ Configuración añadida: " + config.getNombreBD());
     }
 
-    public DatabaseConfig getConfigByName(String nombreBD) {
-        return databaseConfigs.stream()
-                .filter(config -> config.getNombreBD().equals(nombreBD))
-                .findFirst()
-                .orElse(null);
+    private void setupDragAndDrop() {
+        setupDropHandler(zonaArrastre);
+        setupDropHandler(zonaArrastre2);
+    }
+
+    private void setupDropHandler(VBox zona) {
+        zona.setOnDragOver(event -> {
+            if (event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            event.consume();
+        });
+
+        zona.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                for (File file : db.getFiles()) {
+                    if (file.getName().toLowerCase().endsWith(".json")) {
+                        processDroppedFile(file);
+                        success = true;
+                    } else {
+                        System.out.println("⚠ Archivo no válido: " + file.getName());
+                    }
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    private void processDroppedFile(File file) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            DatabaseConfig config = mapper.readValue(file, DatabaseConfig.class);
+            saveConfig(config);
+            connectAndShowTables(config);
+        } catch (IOException e) {
+            System.out.println("❌ Error al procesar el archivo JSON: " + e.getMessage());
+        }
     }
 
     public void connectAndShowTables(DatabaseConfig config) {
+        System.out.println("🔹 Iniciando conexión con la base de datos: " + config.getNombreBD());
         DatabaseConnection connection;
         switch (config.getTipoBD()) {
             case "MySQL":
                 connection = new DatabaseConnectionMySQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
+                break;
+            case "PostgreSQL":
+                connection = new DatabaseConnectionPostgreSQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
                 break;
             default:
                 System.out.println("❌ Tipo de base de datos no soportado");
                 return;
         }
 
-        try {
-            connection.connect();
-            TableViewWindow.showTables(connection);
+        try (Connection conn = connection.connect()) {
+            if (conn != null) {
+                System.out.println("✔ Conexión establecida con éxito.");
+                DatabaseViewer.showTables(config);
+            } else {
+                System.out.println("❌ No se pudo establecer conexión con la base de datos.");
+            }
         } catch (Exception e) {
             System.out.println("❌ Error al conectar a la base de datos: " + e.getMessage());
         }

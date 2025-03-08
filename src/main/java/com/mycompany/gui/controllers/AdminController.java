@@ -44,7 +44,7 @@ public class AdminController {
     @FXML
     public void initialize() {
         // Inicializar el gestor de configuraciones de bases de datos
-        configHandler = new DatabaseConfigHandler(contenedorConfigs);
+        configHandler = new DatabaseConfigHandler(contenedorConfigs, zonaArrastre, zonaArrastre2);
         configHandler.loadConfigs(); // Cargar configuraciones guardadas
 
         // Configurar el Drag and Drop
