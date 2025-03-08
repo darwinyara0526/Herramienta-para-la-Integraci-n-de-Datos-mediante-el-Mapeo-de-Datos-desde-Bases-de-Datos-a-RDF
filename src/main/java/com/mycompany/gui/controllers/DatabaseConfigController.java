@@ -65,6 +65,12 @@ public class DatabaseConfigController {
                 puertoField.setText("1521");
             }
         }
+        if ("MySQL".equals(tipoBD)) {
+            hostField.setText("127.0.0.1");
+            usuarioField.setText("root");
+            passwordField.setText("");
+            nombreBDField.setText("proyecto");
+        }
     }
 
     @FXML
@@ -82,9 +88,12 @@ public class DatabaseConfigController {
         }
 
         DatabaseConnection dbConnection = switch (tipoBD) {
-            case "MySQL" -> new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
-            case "PostgreSQL" -> new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
-            default -> null;
+            case "MySQL" ->
+                new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
+            case "PostgreSQL" ->
+                new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
+            default ->
+                null;
         };
 
         if (dbConnection == null) {
