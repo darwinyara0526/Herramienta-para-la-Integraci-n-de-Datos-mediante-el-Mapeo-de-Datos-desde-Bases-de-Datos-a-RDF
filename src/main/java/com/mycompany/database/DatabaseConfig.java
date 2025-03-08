@@ -75,18 +75,14 @@ public class DatabaseConfig {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
         DatabaseConfig that = (DatabaseConfig) obj;
-        return tipoBD.equals(that.tipoBD)
-                && host.equals(that.host)
-                && puerto.equals(that.puerto)
-                && usuario.equals(that.usuario)
-                && nombreBD.equals(that.nombreBD);
+        return Objects.equals(tipoBD, that.tipoBD) &&
+               Objects.equals(host, that.host) &&
+               Objects.equals(puerto, that.puerto) &&
+               Objects.equals(usuario, that.usuario) &&
+               Objects.equals(nombreBD, that.nombreBD);
     }
 
     @Override
@@ -94,4 +90,14 @@ public class DatabaseConfig {
         return Objects.hash(tipoBD, host, puerto, usuario, nombreBD);
     }
 
+    @Override
+    public String toString() {
+        return "DatabaseConfig{" +
+                "tipoBD='" + tipoBD + '\'' +
+                ", host='" + host + '\'' +
+                ", puerto='" + puerto + '\'' +
+                ", usuario='" + usuario + '\'' +
+                ", nombreBD='" + nombreBD + '\'' +
+                '}';
+    }
 }

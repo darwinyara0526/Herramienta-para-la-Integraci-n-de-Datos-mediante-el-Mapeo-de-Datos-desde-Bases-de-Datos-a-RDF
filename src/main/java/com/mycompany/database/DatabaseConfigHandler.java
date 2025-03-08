@@ -6,19 +6,25 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DatabaseConfigHandler {
 
     private static final String CONFIG_FILE = "data/database_config.json";
-    private VBox configContainer;
-    private VBox zonaArrastre;
-    private VBox zonaArrastre2;
-    private List<DatabaseConfig> databaseConfigs = new ArrayList<>();
+    private final VBox configContainer;
+    private final VBox zonaArrastre;
+    private final VBox zonaArrastre2;
+    private final List<DatabaseConfig> databaseConfigs = new ArrayList<>();
+
+    // Variable para controlar la ventana activa
+    private Stage activeTableViewer = null;
 
     public DatabaseConfigHandler(VBox configContainer, VBox zonaArrastre, VBox zonaArrastre2) {
         this.configContainer = configContainer;
@@ -29,11 +35,11 @@ public class DatabaseConfigHandler {
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
-        return databaseConfigs;
+        return Collections.unmodifiableList(databaseConfigs);
     }
 
     public boolean exists(DatabaseConfig newConfig) {
-        return databaseConfigs.stream().anyMatch(config -> config.equals(newConfig));
+        return databaseConfigs.contains(newConfig);
     }
 
     public void saveConfig(DatabaseConfig config) {
@@ -50,20 +56,21 @@ public class DatabaseConfigHandler {
     public void loadConfigs() {
         ObjectMapper mapper = new ObjectMapper();
         File file = new File(CONFIG_FILE);
-        if (file.exists()) {
-            try {
-                DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
-                databaseConfigs.clear();
-                configContainer.getChildren().clear();
-                for (DatabaseConfig config : configs) {
-                    databaseConfigs.add(config);
-                    addConfigBlock(config);
-                }
-            } catch (IOException e) {
-                System.out.println("❌ Error al cargar el archivo JSON: " + e.getMessage());
-            }
-        } else {
+        if (!file.exists()) {
             System.out.println("⚠ No se encontró archivo de configuraciones, se iniciará vacío.");
+            return;
+        }
+
+        try {
+            DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
+            databaseConfigs.clear();
+            configContainer.getChildren().clear();
+            for (DatabaseConfig config : configs) {
+                databaseConfigs.add(config);
+                addConfigBlock(config);
+            }
+        } catch (IOException e) {
+            System.err.println("❌ Error al cargar el archivo JSON: " + e.getMessage());
         }
     }
 
@@ -71,18 +78,18 @@ public class DatabaseConfigHandler {
         ObjectMapper mapper = new ObjectMapper();
         try {
             File file = new File(CONFIG_FILE);
-            if (!file.getParentFile().exists()) {
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
             mapper.writeValue(file, databaseConfigs);
             System.out.println("✔ Archivo JSON guardado correctamente.");
         } catch (IOException e) {
-            System.out.println("❌ Error al guardar el archivo JSON: " + e.getMessage());
+            System.err.println("❌ Error al guardar el archivo JSON: " + e.getMessage());
         }
     }
 
     public void deleteConfig(DatabaseConfig configToDelete) {
-        if (databaseConfigs.removeIf(config -> config.equals(configToDelete))) {
+        if (databaseConfigs.remove(configToDelete)) {
             saveConfigsToFile();
             loadConfigs();
             System.out.println("✔ Configuración eliminada: " + configToDelete.getNombreBD());
@@ -97,13 +104,16 @@ public class DatabaseConfigHandler {
 
         try {
             String imagePath = "/com/mycompany/images/json-icon.png";
-            Image image = new Image(getClass().getResource(imagePath).toExternalForm());
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            if (image.isError()) {
+                throw new IOException("No se pudo cargar la imagen.");
+            }
             ImageView icon = new ImageView(image);
             icon.setFitWidth(24);
             icon.setFitHeight(24);
             configBlock.setGraphic(icon);
         } catch (Exception e) {
-            System.out.println("⚠ No se pudo cargar la imagen del icono.");
+            System.err.println("⚠ No se pudo cargar la imagen del icono.");
         }
 
         configBlock.setOnMouseClicked(event -> connectAndShowTables(config));
@@ -113,6 +123,12 @@ public class DatabaseConfigHandler {
             ClipboardContent content = new ClipboardContent();
             content.putString(config.getNombreBD());
             db.setContent(content);
+            event.consume();
+        });
+
+        configBlock.setOnDragDone(event -> {
+            System.out.println("✔ Configuración arrastrada: " + config.getNombreBD());
+            connectAndShowTables(config);
             event.consume();
         });
 
@@ -127,7 +143,7 @@ public class DatabaseConfigHandler {
 
     private void setupDropHandler(VBox zona) {
         zona.setOnDragOver(event -> {
-            if (event.getGestureSource() instanceof Button || event.getDragboard().hasFiles()) {
+            if (event.getGestureSource() instanceof javafx.scene.Node || event.getDragboard().hasFiles()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
             event.consume();
@@ -136,7 +152,7 @@ public class DatabaseConfigHandler {
         zona.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
-            
+
             if (db.hasFiles()) {
                 for (File file : db.getFiles()) {
                     if (file.getName().toLowerCase().endsWith(".json")) {
@@ -147,9 +163,8 @@ public class DatabaseConfigHandler {
                     }
                 }
             } else if (db.hasString()) {
-                String configName = db.getString();
                 databaseConfigs.stream()
-                        .filter(config -> config.getNombreBD().equals(configName))
+                        .filter(config -> config.getNombreBD().equals(db.getString()))
                         .findFirst()
                         .ifPresent(this::connectAndShowTables);
                 success = true;
@@ -167,11 +182,17 @@ public class DatabaseConfigHandler {
             saveConfig(config);
             connectAndShowTables(config);
         } catch (IOException e) {
-            System.out.println("❌ Error al procesar el archivo JSON: " + e.getMessage());
+            System.err.println("❌ Error al procesar el archivo JSON: " + e.getMessage());
         }
     }
 
     public void connectAndShowTables(DatabaseConfig config) {
+        if (activeTableViewer != null && activeTableViewer.isShowing()) {
+            System.out.println("⚠ Ya hay una ventana de tablas abierta.");
+            activeTableViewer.toFront();
+            return;
+        }
+
         System.out.println("🔹 Iniciando conexión con la base de datos: " + config.getNombreBD());
         DatabaseConnection connection;
         switch (config.getTipoBD()) {
@@ -182,19 +203,19 @@ public class DatabaseConfigHandler {
                 connection = new DatabaseConnectionPostgreSQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
                 break;
             default:
-                System.out.println("❌ Tipo de base de datos no soportado");
+                System.err.println("❌ Tipo de base de datos no soportado");
                 return;
         }
 
         try (Connection conn = connection.connect()) {
             if (conn != null) {
                 System.out.println("✔ Conexión establecida con éxito.");
-                DatabaseViewer.showTables(config);
+                activeTableViewer = DatabaseViewer.showTables(config);
             } else {
-                System.out.println("❌ No se pudo establecer conexión con la base de datos.");
+                System.err.println("❌ No se pudo establecer conexión con la base de datos.");
             }
         } catch (Exception e) {
-            System.out.println("❌ Error al conectar a la base de datos: " + e.getMessage());
+            System.err.println("❌ Error al conectar a la base de datos: " + e.getMessage());
         }
     }
 }
