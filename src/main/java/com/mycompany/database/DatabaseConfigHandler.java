@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javafx.fxml.FXML;
 
 public class DatabaseConfigHandler {
 
@@ -24,13 +23,17 @@ public class DatabaseConfigHandler {
     private final VBox zonaArrastre2;
     private final List<DatabaseConfig> databaseConfigs = new ArrayList<>();
 
-    // Variable para controlar la ventana activa
     private Stage activeTableViewer = null;
 
     public DatabaseConfigHandler(VBox configContainer, VBox zonaArrastre, VBox zonaArrastre2) {
+        if (configContainer == null || zonaArrastre == null || zonaArrastre2 == null) {
+            throw new IllegalArgumentException("⚠ Error: Los contenedores de configuración y zonas de arrastre no pueden ser nulos.");
+        }
+
         this.configContainer = configContainer;
         this.zonaArrastre = zonaArrastre;
         this.zonaArrastre2 = zonaArrastre2;
+
         loadConfigs();
         setupDragAndDrop();
     }
@@ -79,7 +82,7 @@ public class DatabaseConfigHandler {
         ObjectMapper mapper = new ObjectMapper();
         try {
             File file = new File(CONFIG_FILE);
-            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+            if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
             mapper.writeValue(file, databaseConfigs);
@@ -106,15 +109,14 @@ public class DatabaseConfigHandler {
         try {
             String imagePath = "/com/mycompany/images/json-icon.png";
             Image image = new Image(getClass().getResourceAsStream(imagePath));
-            if (image.isError()) {
-                throw new IOException("No se pudo cargar la imagen.");
+            if (!image.isError()) {
+                ImageView icon = new ImageView(image);
+                icon.setFitWidth(24);
+                icon.setFitHeight(24);
+                configBlock.setGraphic(icon);
             }
-            ImageView icon = new ImageView(image);
-            icon.setFitWidth(24);
-            icon.setFitHeight(24);
-            configBlock.setGraphic(icon);
         } catch (Exception e) {
-            System.err.println("⚠ No se pudo cargar la imagen del icono.");
+            System.err.println("⚠ No se pudo cargar la imagen del icono: " + e.getMessage());
         }
 
         configBlock.setOnMouseClicked(event -> connectAndShowTables(config));
@@ -141,9 +143,6 @@ public class DatabaseConfigHandler {
         setupDropHandler(zonaArrastre);
         setupDropHandler(zonaArrastre2);
     }
-
-    @FXML
-    private VBox zona;
 
     private void setupDropHandler(VBox zona) {
         zona.setOnDragOver(event -> {
