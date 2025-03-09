@@ -33,20 +33,36 @@ public class DatabaseConfigController {
         Platform.runLater(() -> {
             System.out.println("✅ Inicializando DatabaseConfigController...");
 
-            System.out.println("🔍 zonaArrastre: " + zonaArrastre);
-            System.out.println("🔍 zonaArrastre2: " + zonaArrastre2);
-            System.out.println("🔍 configContainer: " + configContainer);
-
-            if (zonaArrastre == null || zonaArrastre2 == null || configContainer == null) {
-                System.err.println("❌ ERROR: zonaArrastre, zonaArrastre2 o configContainer son NULL después de cargar la UI");
+            if (zonaArrastre == null) {
+                System.err.println("❌ ERROR: zonaArrastre es NULL.");
             } else {
+                System.out.println("🔍 zonaArrastre inicializada correctamente.");
+            }
+
+            if (zonaArrastre2 == null) {
+                System.err.println("❌ ERROR: zonaArrastre2 es NULL.");
+            } else {
+                System.out.println("🔍 zonaArrastre2 inicializada correctamente.");
+            }
+
+            if (configContainer == null) {
+                System.err.println("❌ ERROR: configContainer es NULL.");
+            } else {
+                System.out.println("🔍 configContainer inicializada correctamente.");
+            }
+
+            if (zonaArrastre != null && zonaArrastre2 != null && configContainer != null) {
                 configHandler = new DatabaseConfigHandler(configContainer, zonaArrastre, zonaArrastre2);
                 System.out.println("✅ configHandler inicializado correctamente.");
+            } else {
+                System.err.println("⚠ No se pudo inicializar configHandler debido a elementos NULL.");
             }
         });
+    }
 
-        // Deshabilitar botón Guardar hasta que la conexión sea exitosa
-        guardarButton.setDisable(true);
+    public void setZonaArrastreReferences(VBox zona1, VBox zona2) {
+        this.zonaArrastre = zona1;
+        this.zonaArrastre2 = zona2;
     }
 
     @FXML

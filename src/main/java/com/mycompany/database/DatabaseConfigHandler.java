@@ -44,7 +44,10 @@ public class DatabaseConfigHandler {
         System.out.println("🔹 Guardando nueva configuración: " + config.getNombreBD());
         databaseConfigs.add(config);
         saveConfigsToFile();
-        loadConfigs();
+
+        Platform.runLater(() -> {
+            addConfigBlock(config);  // ✅ Agregar visualmente
+        });
     }
 
     public void loadConfigs() {
@@ -129,13 +132,27 @@ public class DatabaseConfigHandler {
 
         configContainer.getChildren().addAll(configBlock, deleteButton);
         System.out.println("✔ Configuración añadida: " + config.getNombreBD());
+
+        configBlock.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {  // Doble clic para eliminar
+                deleteConfig(config);
+            } else {
+                deleteButton.setVisible(!deleteButton.isVisible());
+            }
+        });
     }
 
-    public DatabaseConfig getConfigByName(String nombreBD) {
-        return databaseConfigs.stream()
-                .filter(config -> config.getNombreBD().equals(nombreBD))
-                .findFirst()
-                .orElse(null);
+    private DatabaseConfig getConfigByName(String nombreBD) {
+        System.out.println("🔍 Buscando configuración con nombre: " + nombreBD);
+        for (DatabaseConfig config : databaseConfigs) {
+            System.out.println("   🔎 Comparando con: " + config.getNombreBD());
+            if (config.getNombreBD().equalsIgnoreCase(nombreBD)) {
+                System.out.println("✅ Coincidencia encontrada.");
+                return config;
+            }
+        }
+        System.out.println("⚠️ No se encontró coincidencia para: " + nombreBD);
+        return null;
     }
 
     private void setupDragAndDrop() {
@@ -145,30 +162,43 @@ public class DatabaseConfigHandler {
 
     private void setupDropTarget(VBox zona) {
         zona.setOnDragOver(event -> {
-            if (event.getGestureSource() != zona && event.getDragboard().hasString()) {
-                event.acceptTransferModes(TransferMode.MOVE);
+            if (event.getGestureSource() != zona
+                    && (event.getDragboard().hasFiles() || event.getDragboard().hasString())) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
         });
 
         zona.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
-            if (db.hasString()) {
+            System.out.println("🔹 Evento de arrastre detectado en " + zona.getId());
+
+            if (db.hasFiles()) {
+                File file = db.getFiles().get(0);
+                System.out.println("📂 Archivo detectado: " + file.getAbsolutePath());
+
+                if (file.getName().endsWith(".json")) {
+                    System.out.println("✅ Archivo JSON válido, procesando...");
+                    procesarArchivo(file);
+                } else {
+                    System.out.println("⚠️ No es un archivo JSON válido.");
+                }
+            } else if (db.hasString()) {
                 String nombreBD = db.getString();
-                System.out.println("🔹 Archivo soltado. Nombre de BD recibido: " + nombreBD); // DEBUG
+                System.out.println("🔹 Nombre de BD recibido: " + nombreBD);
 
                 DatabaseConfig config = getConfigByName(nombreBD);
                 if (config != null) {
-                    System.out.println("✅ Configuración encontrada: " + config.getNombreBD()); // DEBUG
-                    DatabaseViewer.showTables(config);
+                    System.out.println("✅ Configuración encontrada: " + config.getNombreBD());
+                    Platform.runLater(() -> DatabaseViewer.showTables(config));
                 } else {
                     System.out.println("⚠️ No se encontró configuración para: " + nombreBD);
                 }
             }
+
             event.setDropCompleted(true);
             event.consume();
         });
-
     }
 
     private void procesarArchivo(File file) {

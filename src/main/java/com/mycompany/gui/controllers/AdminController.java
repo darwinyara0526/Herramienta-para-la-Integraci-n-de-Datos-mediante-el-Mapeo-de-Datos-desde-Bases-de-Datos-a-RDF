@@ -113,16 +113,15 @@ public class AdminController {
 
             // Obtener el controlador de la nueva ventana
             DatabaseConfigController controller = loader.getController();
-            controller.setConfigHandler(this.configHandler);  // Pasar el configHandler
+
+            // Pasar las referencias de zonaArrastre y zonaArrastre2
+            controller.setZonaArrastreReferences(zonaArrastre, zonaArrastre2);
 
             Stage stage = new Stage();
             stage.setTitle("Conectar a Base de Datos");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
-            // Recargar las configuraciones después de cerrar la ventana
-            configHandler.loadConfigs();
         } catch (IOException e) {
             e.printStackTrace();
         }
