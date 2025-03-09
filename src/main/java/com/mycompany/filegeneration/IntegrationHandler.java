@@ -11,9 +11,9 @@ public class IntegrationHandler {
 
     public void executeIntegration() {
         // Datos de conexión - Reemplaza estos valores con los correctos
-        String hostMySQL = "127.0.0.2";
+        String hostMySQL = "127.0.0.1";
         String puertoMySQL = "3344";
-        String usuarioMySQL = "roo33t";
+        String usuarioMySQL = "root";
         String passwordMySQL = "";
         String nombreBDMySQL = "proyecto";
 

@@ -1,5 +1,4 @@
 com\mycompany\database\DatabaseConfig.class
-com\mycompany\gui\controllers\TableViewWindow.class
 com\mycompany\gui\models\Usuario.class
 com\mycompany\rdfintegration\RDFtoCSVConverter.class
 com\mycompany\database\DatabaseConnectionPostgreSQL.class

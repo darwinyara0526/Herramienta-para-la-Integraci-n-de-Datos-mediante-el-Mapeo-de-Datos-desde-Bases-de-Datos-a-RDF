@@ -1,7 +1,6 @@
 package com.mycompany.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.gui.controllers.TableViewWindow;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
@@ -146,7 +145,6 @@ public class DatabaseConfigHandler {
 
         try {
             connection.connect();
-            TableViewWindow.showTables(connection);
         } catch (Exception e) {
             System.out.println("❌ Error al conectar a la base de datos: " + e.getMessage());
         }
