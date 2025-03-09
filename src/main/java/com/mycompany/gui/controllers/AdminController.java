@@ -43,15 +43,24 @@ public class AdminController {
 
     @FXML
     public void initialize() {
+        System.out.println("Inicializando AdminController...");
+        System.out.println("zonaArrastre: " + zonaArrastre);
+        System.out.println("zonaArrastre2: " + zonaArrastre2);
+
+        if (zonaArrastre == null || zonaArrastre2 == null) {
+            System.err.println("ERROR: zonaArrastre o zonaArrastre2 es NULL después de cargar la UI");
+            return;
+        }
+
         // Inicializar el gestor de configuraciones de bases de datos
         configHandler = new DatabaseConfigHandler(contenedorConfigs, zonaArrastre, zonaArrastre2);
-        configHandler.loadConfigs(); // Cargar configuraciones guardadas
+        configHandler.loadConfigs();
 
         // Configurar el Drag and Drop
         dragAndDropHandler = new DragAndDropHandler(configHandler);
         dragAndDropHandler.enableDragAndDrop(zonaArrastre);
         dragAndDropHandler.enableDragAndDrop(zonaArrastre2);
-        dragAndDropHandler.enableDragAndDrop(contenedorConfigs); // Habilitar en contenedorConfigs
+        dragAndDropHandler.enableDragAndDrop(contenedorConfigs);
     }
 
     public void setUsuario(Usuario usuario) {
@@ -102,14 +111,17 @@ public class AdminController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/view/DatabaseConfig.fxml"));
             Parent root = loader.load();
 
+            // Obtener el controlador de la nueva ventana
+            DatabaseConfigController controller = loader.getController();
+
+            // Pasar las referencias de zonaArrastre y zonaArrastre2
+            controller.setZonaArrastreReferences(zonaArrastre, zonaArrastre2);
+
             Stage stage = new Stage();
             stage.setTitle("Conectar a Base de Datos");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
-            // Recargar las configuraciones después de cerrar la ventana
-            configHandler.loadConfigs();
         } catch (IOException e) {
             e.printStackTrace();
         }

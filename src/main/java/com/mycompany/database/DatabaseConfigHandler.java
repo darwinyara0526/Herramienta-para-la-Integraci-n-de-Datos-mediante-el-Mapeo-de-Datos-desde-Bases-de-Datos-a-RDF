@@ -6,44 +6,34 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.Stage;
-
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import javafx.application.Platform;
 
 public class DatabaseConfigHandler {
 
     private static final String CONFIG_FILE = "data/database_config.json";
-    private final VBox configContainer;
-    private final VBox zonaArrastre;
-    private final VBox zonaArrastre2;
-    private final List<DatabaseConfig> databaseConfigs = new ArrayList<>();
-
-    private Stage activeTableViewer = null;
+    private VBox configContainer;
+    private VBox zonaArrastre;
+    private VBox zonaArrastre2;
+    private List<DatabaseConfig> databaseConfigs = new ArrayList<>();
 
     public DatabaseConfigHandler(VBox configContainer, VBox zonaArrastre, VBox zonaArrastre2) {
-        if (configContainer == null || zonaArrastre == null || zonaArrastre2 == null) {
-            throw new IllegalArgumentException("⚠ Error: Los contenedores de configuración y zonas de arrastre no pueden ser nulos.");
-        }
-
         this.configContainer = configContainer;
         this.zonaArrastre = zonaArrastre;
         this.zonaArrastre2 = zonaArrastre2;
-
         loadConfigs();
         setupDragAndDrop();
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
-        return Collections.unmodifiableList(databaseConfigs);
+        return databaseConfigs;
     }
 
     public boolean exists(DatabaseConfig newConfig) {
-        return databaseConfigs.contains(newConfig);
+        return databaseConfigs.stream().anyMatch(config -> config.equals(newConfig));
     }
 
     public void saveConfig(DatabaseConfig config) {
@@ -54,27 +44,29 @@ public class DatabaseConfigHandler {
         System.out.println("🔹 Guardando nueva configuración: " + config.getNombreBD());
         databaseConfigs.add(config);
         saveConfigsToFile();
-        loadConfigs();
+
+        Platform.runLater(() -> {
+            addConfigBlock(config);  // ✅ Agregar visualmente
+        });
     }
 
     public void loadConfigs() {
         ObjectMapper mapper = new ObjectMapper();
         File file = new File(CONFIG_FILE);
-        if (!file.exists()) {
-            System.out.println("⚠ No se encontró archivo de configuraciones, se iniciará vacío.");
-            return;
-        }
-
-        try {
-            DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
-            databaseConfigs.clear();
-            configContainer.getChildren().clear();
-            for (DatabaseConfig config : configs) {
-                databaseConfigs.add(config);
-                addConfigBlock(config);
+        if (file.exists()) {
+            try {
+                DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
+                databaseConfigs.clear();
+                configContainer.getChildren().clear();
+                for (DatabaseConfig config : configs) {
+                    databaseConfigs.add(config);
+                    addConfigBlock(config);
+                }
+            } catch (IOException e) {
+                System.out.println("❌ Error al cargar el archivo JSON: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.err.println("❌ Error al cargar el archivo JSON: " + e.getMessage());
+        } else {
+            System.out.println("⚠ No se encontró archivo de configuraciones, se iniciará vacío.");
         }
     }
 
@@ -88,12 +80,12 @@ public class DatabaseConfigHandler {
             mapper.writeValue(file, databaseConfigs);
             System.out.println("✔ Archivo JSON guardado correctamente.");
         } catch (IOException e) {
-            System.err.println("❌ Error al guardar el archivo JSON: " + e.getMessage());
+            System.out.println("❌ Error al guardar el archivo JSON: " + e.getMessage());
         }
     }
 
     public void deleteConfig(DatabaseConfig configToDelete) {
-        if (databaseConfigs.remove(configToDelete)) {
+        if (databaseConfigs.removeIf(config -> config.equals(configToDelete))) {
             saveConfigsToFile();
             loadConfigs();
             System.out.println("✔ Configuración eliminada: " + configToDelete.getNombreBD());
@@ -106,21 +98,23 @@ public class DatabaseConfigHandler {
         Button configBlock = new Button(config.getNombreBD());
         configBlock.getStyleClass().add("config-block");
 
+        // Cargar imagen del icono
+        Image image = null;
         try {
             String imagePath = "/com/mycompany/images/json-icon.png";
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            if (!image.isError()) {
-                ImageView icon = new ImageView(image);
-                icon.setFitWidth(24);
-                icon.setFitHeight(24);
-                configBlock.setGraphic(icon);
-            }
+            image = new Image(getClass().getResource(imagePath).toExternalForm());
         } catch (Exception e) {
-            System.err.println("⚠ No se pudo cargar la imagen del icono: " + e.getMessage());
+            System.out.println("⚠ No se pudo cargar la imagen del icono.");
         }
 
-        configBlock.setOnMouseClicked(event -> connectAndShowTables(config));
+        if (image != null) {
+            ImageView icon = new ImageView(image);
+            icon.setFitWidth(24);
+            icon.setFitHeight(24);
+            configBlock.setGraphic(icon);
+        }
 
+        // Habilitar arrastre
         configBlock.setOnDragDetected(event -> {
             Dragboard db = configBlock.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent content = new ClipboardContent();
@@ -129,96 +123,97 @@ public class DatabaseConfigHandler {
             event.consume();
         });
 
-        configBlock.setOnDragDone(event -> {
-            System.out.println("✔ Configuración arrastrada: " + config.getNombreBD());
-            connectAndShowTables(config);
-            event.consume();
-        });
+        Button deleteButton = new Button("Eliminar");
+        deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+        deleteButton.setOnAction(event -> deleteConfig(config));
+        deleteButton.setVisible(false);
 
-        configContainer.getChildren().add(configBlock);
+        configBlock.setOnMouseClicked(event -> deleteButton.setVisible(!deleteButton.isVisible()));
+
+        configContainer.getChildren().addAll(configBlock, deleteButton);
         System.out.println("✔ Configuración añadida: " + config.getNombreBD());
+
+        configBlock.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {  // Doble clic para eliminar
+                deleteConfig(config);
+            } else {
+                deleteButton.setVisible(!deleteButton.isVisible());
+            }
+        });
+    }
+
+    private DatabaseConfig getConfigByName(String nombreBD) {
+        System.out.println("🔍 Buscando configuración con nombre: " + nombreBD);
+        for (DatabaseConfig config : databaseConfigs) {
+            System.out.println("   🔎 Comparando con: " + config.getNombreBD());
+            if (config.getNombreBD().equalsIgnoreCase(nombreBD)) {
+                System.out.println("✅ Coincidencia encontrada.");
+                return config;
+            }
+        }
+        System.out.println("⚠️ No se encontró coincidencia para: " + nombreBD);
+        return null;
     }
 
     private void setupDragAndDrop() {
-        setupDropHandler(zonaArrastre);
-        setupDropHandler(zonaArrastre2);
+        setupDropTarget(zonaArrastre);
+        setupDropTarget(zonaArrastre2);
     }
 
-    private void setupDropHandler(VBox zona) {
+    private void setupDropTarget(VBox zona) {
         zona.setOnDragOver(event -> {
-            if (event.getGestureSource() instanceof javafx.scene.Node || event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.MOVE);
+            if (event.getGestureSource() != zona
+                    && (event.getDragboard().hasFiles() || event.getDragboard().hasString())) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
         });
 
         zona.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
-            boolean success = false;
+            System.out.println("🔹 Evento de arrastre detectado en " + zona.getId());
 
             if (db.hasFiles()) {
-                for (File file : db.getFiles()) {
-                    if (file.getName().toLowerCase().endsWith(".json")) {
-                        processDroppedFile(file);
-                        success = true;
-                    } else {
-                        System.out.println("⚠ Archivo no válido: " + file.getName());
-                    }
+                File file = db.getFiles().get(0);
+                System.out.println("📂 Archivo detectado: " + file.getAbsolutePath());
+
+                if (file.getName().endsWith(".json")) {
+                    System.out.println("✅ Archivo JSON válido, procesando...");
+                    procesarArchivo(file);
+                } else {
+                    System.out.println("⚠️ No es un archivo JSON válido.");
                 }
             } else if (db.hasString()) {
-                databaseConfigs.stream()
-                        .filter(config -> config.getNombreBD().equals(db.getString()))
-                        .findFirst()
-                        .ifPresent(this::connectAndShowTables);
-                success = true;
+                String nombreBD = db.getString();
+                System.out.println("🔹 Nombre de BD recibido: " + nombreBD);
+
+                DatabaseConfig config = getConfigByName(nombreBD);
+                if (config != null) {
+                    System.out.println("✅ Configuración encontrada: " + config.getNombreBD());
+                    Platform.runLater(() -> DatabaseViewer.showTables(config));
+                } else {
+                    System.out.println("⚠️ No se encontró configuración para: " + nombreBD);
+                }
             }
 
-            event.setDropCompleted(success);
+            event.setDropCompleted(true);
             event.consume();
         });
     }
 
-    private void processDroppedFile(File file) {
-        ObjectMapper mapper = new ObjectMapper();
+    private void procesarArchivo(File file) {
         try {
-            DatabaseConfig config = mapper.readValue(file, DatabaseConfig.class);
-            saveConfig(config);
-            connectAndShowTables(config);
+            ObjectMapper objectMapper = new ObjectMapper();
+            DatabaseConfig config = objectMapper.readValue(file, DatabaseConfig.class);
+
+            Platform.runLater(() -> {
+                DatabaseViewer.showTables(config);
+            });
+
         } catch (IOException e) {
-            System.err.println("❌ Error al procesar el archivo JSON: " + e.getMessage());
+            System.err.println("Error al leer el archivo JSON: " + e.getMessage());
         }
     }
 
-    public void connectAndShowTables(DatabaseConfig config) {
-        if (activeTableViewer != null && activeTableViewer.isShowing()) {
-            System.out.println("⚠ Ya hay una ventana de tablas abierta.");
-            activeTableViewer.toFront();
-            return;
-        }
-
-        System.out.println("🔹 Iniciando conexión con la base de datos: " + config.getNombreBD());
-        DatabaseConnection connection;
-        switch (config.getTipoBD()) {
-            case "MySQL":
-                connection = new DatabaseConnectionMySQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
-                break;
-            case "PostgreSQL":
-                connection = new DatabaseConnectionPostgreSQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
-                break;
-            default:
-                System.err.println("❌ Tipo de base de datos no soportado");
-                return;
-        }
-
-        try (Connection conn = connection.connect()) {
-            if (conn != null) {
-                System.out.println("✔ Conexión establecida con éxito.");
-                activeTableViewer = DatabaseViewer.showTables(config);
-            } else {
-                System.err.println("❌ No se pudo establecer conexión con la base de datos.");
-            }
-        } catch (Exception e) {
-            System.err.println("❌ Error al conectar a la base de datos: " + e.getMessage());
-        }
-    }
 }
+
