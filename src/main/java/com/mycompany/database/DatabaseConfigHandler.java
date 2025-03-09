@@ -10,16 +10,22 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 
 public class DatabaseConfigHandler {
 
     private static final String CONFIG_FILE = "data/database_config.json";
     private VBox configContainer;
+    private VBox zonaArrastre;
+    private VBox zonaArrastre2;
     private List<DatabaseConfig> databaseConfigs = new ArrayList<>();
 
-    public DatabaseConfigHandler(VBox configContainer) {
+    public DatabaseConfigHandler(VBox configContainer, VBox zonaArrastre, VBox zonaArrastre2) {
         this.configContainer = configContainer;
+        this.zonaArrastre = zonaArrastre;
+        this.zonaArrastre2 = zonaArrastre2;
         loadConfigs();
+        setupDragAndDrop();
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
@@ -132,21 +138,51 @@ public class DatabaseConfigHandler {
                 .orElse(null);
     }
 
-    public void connectAndShowTables(DatabaseConfig config) {
-        DatabaseConnection connection;
-        switch (config.getTipoBD()) {
-            case "MySQL":
-                connection = new DatabaseConnectionMySQL(config.getHost(), config.getPuerto(), config.getUsuario(), config.getPassword(), config.getNombreBD());
-                break;
-            default:
-                System.out.println("❌ Tipo de base de datos no soportado");
-                return;
-        }
+    private void setupDragAndDrop() {
+        setupDropTarget(zonaArrastre);
+        setupDropTarget(zonaArrastre2);
+    }
 
+    private void setupDropTarget(VBox zona) {
+        zona.setOnDragOver(event -> {
+            if (event.getGestureSource() != zona && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        zona.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                String nombreBD = db.getString();
+                System.out.println("🔹 Archivo soltado. Nombre de BD recibido: " + nombreBD); // DEBUG
+
+                DatabaseConfig config = getConfigByName(nombreBD);
+                if (config != null) {
+                    System.out.println("✅ Configuración encontrada: " + config.getNombreBD()); // DEBUG
+                    DatabaseViewer.showTables(config);
+                } else {
+                    System.out.println("⚠️ No se encontró configuración para: " + nombreBD);
+                }
+            }
+            event.setDropCompleted(true);
+            event.consume();
+        });
+
+    }
+
+    private void procesarArchivo(File file) {
         try {
-            connection.connect();
-        } catch (Exception e) {
-            System.out.println("❌ Error al conectar a la base de datos: " + e.getMessage());
+            ObjectMapper objectMapper = new ObjectMapper();
+            DatabaseConfig config = objectMapper.readValue(file, DatabaseConfig.class);
+
+            Platform.runLater(() -> {
+                DatabaseViewer.showTables(config);
+            });
+
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo JSON: " + e.getMessage());
         }
     }
+
 }

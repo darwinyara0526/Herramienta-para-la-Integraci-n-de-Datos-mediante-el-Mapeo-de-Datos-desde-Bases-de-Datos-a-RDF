@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import javafx.application.Platform;
 
 public class DatabaseConfigController {
 
@@ -21,20 +22,31 @@ public class DatabaseConfigController {
     @FXML
     private Button guardarButton, eliminarButton;
     @FXML
-    private VBox configContainer;
+    private VBox configContainer, zonaArrastre, zonaArrastre2;
 
     private DatabaseConfigHandler configHandler;
 
     @FXML
     private void initialize() {
-        configHandler = new DatabaseConfigHandler(configContainer);
-        tipoBDComboBox.getItems().addAll("MySQL", "PostgreSQL");
-        if (guardarButton != null) {
-            guardarButton.setDisable(true); // Inicia deshabilitado
-        }
-        if (eliminarButton != null) {
-            eliminarButton.setVisible(false); // Se oculta inicialmente
-        }
+        tipoBDComboBox.getItems().addAll("MySQL", "PostgreSQL", "SQL Server", "Oracle");
+
+        Platform.runLater(() -> {
+            System.out.println("✅ Inicializando DatabaseConfigController...");
+
+            System.out.println("🔍 zonaArrastre: " + zonaArrastre);
+            System.out.println("🔍 zonaArrastre2: " + zonaArrastre2);
+            System.out.println("🔍 configContainer: " + configContainer);
+
+            if (zonaArrastre == null || zonaArrastre2 == null || configContainer == null) {
+                System.err.println("❌ ERROR: zonaArrastre, zonaArrastre2 o configContainer son NULL después de cargar la UI");
+            } else {
+                configHandler = new DatabaseConfigHandler(configContainer, zonaArrastre, zonaArrastre2);
+                System.out.println("✅ configHandler inicializado correctamente.");
+            }
+        });
+
+        // Deshabilitar botón Guardar hasta que la conexión sea exitosa
+        guardarButton.setDisable(true);
     }
 
     @FXML
@@ -58,6 +70,7 @@ public class DatabaseConfigController {
                 puertoField.setText("1521");
             }
         }
+
         if ("MySQL".equals(tipoBD)) {
             hostField.setText("127.0.0.1");
             usuarioField.setText("root");
@@ -69,13 +82,18 @@ public class DatabaseConfigController {
     @FXML
     private void probarConexion() {
         String tipoBD = tipoBDComboBox.getValue();
+        if (tipoBD == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Faltan datos", "Seleccione un tipo de base de datos.");
+            return;
+        }
+
         String host = hostField.getText().trim();
         String puerto = puertoField.getText().trim();
         String usuario = usuarioField.getText().trim();
         String password = passwordField.getText().trim();
         String nombreBD = nombreBDField.getText().trim();
 
-        if (tipoBD == null || host.isEmpty() || puerto.isEmpty() || usuario.isEmpty() || nombreBD.isEmpty()) {
+        if (host.isEmpty() || puerto.isEmpty() || usuario.isEmpty() || nombreBD.isEmpty()) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Faltan datos", "Por favor, complete todos los campos.");
             return;
         }
@@ -96,7 +114,7 @@ public class DatabaseConfigController {
 
         try (Connection conn = dbConnection.connect()) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Conexión exitosa", "Se estableció la conexión con " + tipoBD);
-            guardarButton.setDisable(false);
+            guardarButton.setDisable(false); // Habilitar botón Guardar
         } catch (SQLException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo conectar", "Detalles: " + e.getMessage());
             guardarButton.setDisable(true);
@@ -106,20 +124,38 @@ public class DatabaseConfigController {
     @FXML
     private void guardarConexion() {
         System.out.println("🔹 Botón Guardar presionado...");
-        DatabaseConfig config = new DatabaseConfig(
-                tipoBDComboBox.getValue(),
-                hostField.getText(),
-                puertoField.getText(),
-                usuarioField.getText(),
-                passwordField.getText(),
-                nombreBDField.getText()
-        );
 
-        configHandler.saveConfig(config);
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Guardar Configuración", "Éxito", "Configuración guardada correctamente.");
-        if (eliminarButton != null) {
-            eliminarButton.setVisible(true);
+        if (configHandler == null) {
+            System.err.println("❌ ERROR: configHandler es NULL. No se puede guardar la configuración.");
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error interno", "No se pudo guardar la configuración porque el gestor no está inicializado.");
+            return;
         }
+
+        try {
+            DatabaseConfig config = new DatabaseConfig(
+                    tipoBDComboBox.getValue(),
+                    hostField.getText(),
+                    puertoField.getText(),
+                    usuarioField.getText(),
+                    passwordField.getText(),
+                    nombreBDField.getText()
+            );
+
+            configHandler.saveConfig(config);
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Guardar Configuración", "Éxito", "Configuración guardada correctamente.");
+
+            if (eliminarButton != null) {
+                eliminarButton.setVisible(true);
+            }
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al guardar", "Detalles: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void setConfigHandler(DatabaseConfigHandler configHandler) {
+        this.configHandler = configHandler;
+        System.out.println("✅ configHandler recibido correctamente.");
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
