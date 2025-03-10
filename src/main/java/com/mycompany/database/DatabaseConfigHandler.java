@@ -26,6 +26,8 @@ public class DatabaseConfigHandler {
         this.zonaArrastre2 = zonaArrastre2;
         loadConfigs();
         setupDragAndDrop();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(this::limpiarArchivoConfig));
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
@@ -215,5 +217,15 @@ public class DatabaseConfigHandler {
         }
     }
 
-}
+    private void limpiarArchivoConfig() {
+        File file = new File(CONFIG_FILE);
+        if (file.exists()) {
+            if (file.delete()) {
+                System.out.println("🗑 Archivo de configuración eliminado correctamente al cerrar la aplicación.");
+            } else {
+                System.out.println("⚠ No se pudo eliminar el archivo de configuración.");
+            }
+        }
+    }
 
+}

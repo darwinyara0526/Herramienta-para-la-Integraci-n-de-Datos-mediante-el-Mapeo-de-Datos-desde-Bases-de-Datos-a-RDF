@@ -55,12 +55,4 @@
         </HBox>
     </GridPane>
 
-    <!-- Contenedor de configuraciones guardadas -->
-    <Label text="Conexiones Guardadas:" styleClass="titulo"/>
-    <ScrollPane fitToWidth="true" prefHeight="150">
-        <content>
-            <VBox fx:id="configContainer" spacing="5"/>
-        </content>
-    </ScrollPane>
-
 </VBox>
