@@ -30,6 +30,9 @@ public class DatabaseConfigController {
     private void initialize() {
         tipoBDComboBox.getItems().addAll("MySQL", "PostgreSQL", "SQL Server", "Oracle");
 
+        // Deshabilitar botón "Guardar" al inicio
+        guardarButton.setDisable(true);
+
         Platform.runLater(() -> {
             System.out.println("✅ Inicializando DatabaseConfigController...");
 
@@ -115,12 +118,9 @@ public class DatabaseConfigController {
         }
 
         DatabaseConnection dbConnection = switch (tipoBD) {
-            case "MySQL" ->
-                new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
-            case "PostgreSQL" ->
-                new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
-            default ->
-                null;
+            case "MySQL" -> new DatabaseConnectionMySQL(host, puerto, usuario, password, nombreBD);
+            case "PostgreSQL" -> new DatabaseConnectionPostgreSQL(host, puerto, usuario, password, nombreBD);
+            default -> null;
         };
 
         if (dbConnection == null) {
@@ -130,16 +130,22 @@ public class DatabaseConfigController {
 
         try (Connection conn = dbConnection.connect()) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Conexión exitosa", "Se estableció la conexión con " + tipoBD);
-            guardarButton.setDisable(false); // Habilitar botón Guardar
+            guardarButton.setDisable(false); // Habilitar botón "Guardar"
         } catch (SQLException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo conectar", "Detalles: " + e.getMessage());
-            guardarButton.setDisable(true);
+            guardarButton.setDisable(true); // Mantener deshabilitado si la conexión falla
         }
     }
 
     @FXML
     private void guardarConexion() {
         System.out.println("🔹 Botón Guardar presionado...");
+
+        if (guardarButton.isDisabled()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Debe probar la conexión", 
+                          "Antes de guardar, asegúrese de que la conexión sea válida.");
+            return;
+        }
 
         if (configHandler == null) {
             System.err.println("❌ ERROR: configHandler es NULL. No se puede guardar la configuración.");
