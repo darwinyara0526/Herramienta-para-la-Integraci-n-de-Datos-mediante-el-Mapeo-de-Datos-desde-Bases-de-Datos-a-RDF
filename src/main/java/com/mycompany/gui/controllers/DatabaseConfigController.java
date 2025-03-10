@@ -174,6 +174,10 @@ public class DatabaseConfigController {
         System.out.println("✅ configHandler recibido correctamente.");
     }
 
+    public void setConfigContainer(VBox contenedorConfigs) {
+        this.configContainer = contenedorConfigs;
+    }
+
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String encabezado, String contenido) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);

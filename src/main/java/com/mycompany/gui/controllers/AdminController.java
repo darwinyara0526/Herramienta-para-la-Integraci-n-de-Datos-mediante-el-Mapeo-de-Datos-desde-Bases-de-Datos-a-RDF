@@ -111,11 +111,12 @@ public class AdminController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/view/DatabaseConfig.fxml"));
             Parent root = loader.load();
 
-            // Obtener el controlador de la nueva ventana
+            // Obtener el controlador
             DatabaseConfigController controller = loader.getController();
 
-            // Pasar las referencias de zonaArrastre y zonaArrastre2
+            // Pasar referencias
             controller.setZonaArrastreReferences(zonaArrastre, zonaArrastre2);
+            controller.setConfigContainer(contenedorConfigs); // ✅ Pasar contenedorConfigs
 
             Stage stage = new Stage();
             stage.setTitle("Conectar a Base de Datos");
