@@ -26,7 +26,7 @@ public class DatabaseViewer {
         VBox root = new VBox();
         CheckBox selectAllCheckBox = new CheckBox("Seleccionar todas");
         ListView<CheckBox> tableListView = new ListView<>();
-        Button integrateButton = new Button("Integrar seleccionadas");
+        Button selectButton = new Button("Seleccionar Tablas"); // ✅ Nuevo texto del botón
 
         DatabaseConnection connection;
 
@@ -64,17 +64,24 @@ public class DatabaseViewer {
             }
         });
 
-        integrateButton.setOnAction(event -> {
+        selectButton.setOnAction(event -> {
             List<String> selectedTables = new ArrayList<>();
             for (CheckBox checkBox : tableListView.getItems()) {
                 if (checkBox.isSelected()) {
                     selectedTables.add(checkBox.getText());
                 }
             }
-            System.out.println("Tablas seleccionadas: " + selectedTables);
+
+            if (selectedTables.isEmpty()) {
+                showInfo("No has seleccionado ninguna tabla.");
+            } else {
+                System.out.println("✅ Tablas seleccionadas: " + selectedTables);
+                showInfo("Se seleccionaron las siguientes tablas: " + selectedTables);
+                stage.close(); // ✅ Cierra la ventana después de seleccionar
+            }
         });
 
-        root.getChildren().addAll(selectAllCheckBox, tableListView, integrateButton);
+        root.getChildren().addAll(selectAllCheckBox, tableListView, selectButton);
         Scene scene = new Scene(root, 300, 400);
         stage.setScene(scene);
         stage.setTitle("Tablas en " + config.getNombreBD());
@@ -104,6 +111,14 @@ public class DatabaseViewer {
     private static void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private static void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

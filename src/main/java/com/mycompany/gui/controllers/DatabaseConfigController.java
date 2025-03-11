@@ -96,6 +96,12 @@ public class DatabaseConfigController {
             passwordField.setText("");
             nombreBDField.setText("proyecto");
         }
+              if ("PostgreSQL".equals(tipoBD)) {
+            hostField.setText("Localhost");
+            usuarioField.setText("postgres");
+            passwordField.setText("1familiayara");
+            nombreBDField.setText("productos");
+        }
     }
 
     @FXML

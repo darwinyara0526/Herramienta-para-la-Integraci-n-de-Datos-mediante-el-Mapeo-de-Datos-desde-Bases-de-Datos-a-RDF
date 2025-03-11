@@ -1,6 +1,8 @@
 package com.mycompany.gui.controllers;
 
 import com.mycompany.database.DatabaseConfigHandler;
+import com.mycompany.database.DatabaseSelectionManager;
+import com.mycompany.filegeneration.IntegrationHandler;
 import com.mycompany.gui.handlers.DragAndDropHandler;
 import com.mycompany.gui.models.Usuario;
 import javafx.fxml.FXML;
@@ -13,6 +15,8 @@ import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public class AdminController {
 
@@ -46,6 +50,8 @@ public class AdminController {
         System.out.println("Inicializando AdminController...");
         System.out.println("zonaArrastre: " + zonaArrastre);
         System.out.println("zonaArrastre2: " + zonaArrastre2);
+        
+        mostrarSeleccion();
 
         if (zonaArrastre == null || zonaArrastre2 == null) {
             System.err.println("ERROR: zonaArrastre o zonaArrastre2 es NULL después de cargar la UI");
@@ -79,15 +85,14 @@ public class AdminController {
 
     @FXML
     private void iniciarIntegracion() {
-        if (configHandler.getDatabaseConfigs().isEmpty()) {
-            mostrarAlerta("Error", "No hay configuraciones de base de datos cargadas.");
-            return;
-        }
-
         progresoIntegracion.setProgress(0.1);
 
-        // Simulación de carga de datos
+        // Iniciar el proceso de integración
         System.out.println("Iniciando integración de datos...");
+
+        IntegrationHandler integrationHandler = new IntegrationHandler();
+        integrationHandler.executeIntegration(); // Llamada al método de integración
+
         progresoIntegracion.setProgress(1.0);
         System.out.println("Integración finalizada.");
     }
@@ -126,6 +131,13 @@ public class AdminController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void mostrarSeleccion() {
+        Map<String, List<String>> seleccion = DatabaseSelectionManager.getAllSelections();
+        seleccion.forEach((db, tables)
+                -> System.out.println("📂 BD: " + db + " - Tablas: " + tables)
+        );
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
