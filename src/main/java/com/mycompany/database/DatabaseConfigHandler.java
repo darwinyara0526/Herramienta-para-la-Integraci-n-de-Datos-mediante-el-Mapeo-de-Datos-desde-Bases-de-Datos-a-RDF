@@ -9,7 +9,9 @@ import javafx.scene.image.ImageView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.application.Platform;
 
 public class DatabaseConfigHandler {
@@ -26,8 +28,25 @@ public class DatabaseConfigHandler {
         this.zonaArrastre2 = zonaArrastre2;
         loadConfigs();
         setupDragAndDrop();
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread(this::limpiarArchivoConfig));
+    }
+
+    // ✅ Nuevo constructor sin interfaz gráfica
+    public DatabaseConfigHandler() {
+        this.loadConfigs();  // Solo carga configuraciones
+    }
+
+    public static Map<String, DatabaseConfig> getAllConfigs() {
+        Map<String, DatabaseConfig> configMap = new HashMap<>();
+
+        DatabaseConfigHandler handler = new DatabaseConfigHandler(); // ✅ Usa el nuevo constructor
+
+        for (DatabaseConfig config : handler.getDatabaseConfigs()) {
+            configMap.put(config.getNombreBD(), config);
+        }
+
+        return configMap;
     }
 
     public List<DatabaseConfig> getDatabaseConfigs() {
@@ -55,14 +74,22 @@ public class DatabaseConfigHandler {
     public void loadConfigs() {
         ObjectMapper mapper = new ObjectMapper();
         File file = new File(CONFIG_FILE);
+
         if (file.exists()) {
             try {
                 DatabaseConfig[] configs = mapper.readValue(file, DatabaseConfig[].class);
                 databaseConfigs.clear();
-                configContainer.getChildren().clear();
+
+                // Verificar si configContainer no es nulo antes de usarlo
+                if (configContainer != null) {
+                    Platform.runLater(() -> configContainer.getChildren().clear());
+                }
+
                 for (DatabaseConfig config : configs) {
                     databaseConfigs.add(config);
-                    addConfigBlock(config);
+                    if (configContainer != null) {
+                        Platform.runLater(() -> addConfigBlock(config));
+                    }
                 }
             } catch (IOException e) {
                 System.out.println("❌ Error al cargar el archivo JSON: " + e.getMessage());
