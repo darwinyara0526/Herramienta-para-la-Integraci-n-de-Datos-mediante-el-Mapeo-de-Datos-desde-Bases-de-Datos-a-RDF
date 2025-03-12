@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,9 @@ public class IntegrationHandler {
         String outputDirectory = selectedDirectory.getAbsolutePath();
         System.out.println("📂 Carpeta seleccionada: " + outputDirectory);
 
+        // Lista de archivos RDF generados
+        List<String> rdfFiles = new ArrayList<>();
+
         for (Map.Entry<String, DatabaseConfig> entry : dbConfigs.entrySet()) {
             String dbName = entry.getKey();
             DatabaseConfig config = entry.getValue();
@@ -60,10 +64,6 @@ public class IntegrationHandler {
                 continue;
             }
 
-            // Obtener tablas seleccionadas
-            List<String> selectedTables = DatabaseSelectionManager.getSelectedTables(dbName);
-            System.out.println("📌 Tablas seleccionadas para " + dbName + ": " + selectedTables);
-
             // Definir rutas dinámicas
             String turtlePath = Paths.get(outputDirectory, dbName + "_output.ttl").toString();
             String rdfPath = Paths.get(outputDirectory, dbName + "_output.rdf").toString();
@@ -74,11 +74,34 @@ public class IntegrationHandler {
 
             // Procesar la base de datos
             processDatabase(dbConnection, turtlePath, rdfPath);
+            rdfFiles.add(rdfPath); // Agregar el RDF generado a la lista
         }
 
-        // Integración RDFs generados
+        // Integración de RDFs generados
         System.out.println("🔄 Integrando RDFs...");
         RDFIntegrator integrator = new RDFIntegrator();
+
+        if (rdfFiles.isEmpty()) {
+            System.out.println("⚠️ No se generaron archivos RDF para integrar.");
+            return;
+        }
+
+        // Archivo final unificado
+        String unifiedRDFPath = Paths.get(outputDirectory, "unified_output.rdf").toString();
+
+        // Si hay más de un RDF, integrarlos
+        if (rdfFiles.size() > 1) {
+            String rdfBase = rdfFiles.get(0); // Primer RDF como base
+            for (int i = 1; i < rdfFiles.size(); i++) {
+                System.out.println("🔗 Integrando RDF: " + rdfFiles.get(i) + " en " + rdfBase);
+                integrator.integrateRDF(rdfBase, rdfFiles.get(i));
+            }
+            // Copiar el resultado final a unified_output.rdf
+            new File(rdfBase).renameTo(new File(unifiedRDFPath));
+        } else {
+            // Si solo hay un RDF, usarlo como unified_output
+            new File(rdfFiles.get(0)).renameTo(new File(unifiedRDFPath));
+        }
 
         // Exportar en diferentes formatos en la carpeta seleccionada
         String outputBasePath = Paths.get(outputDirectory, "unified_output").toString();
