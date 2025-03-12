@@ -2,7 +2,10 @@ package com.mycompany.filegeneration;
 
 import com.mycompany.database.*;
 import com.mycompany.rdfintegration.RDFIntegrator;
-import com.mycompany.database.DatabaseConfigHandler;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+
+import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.List;
@@ -10,7 +13,7 @@ import java.util.Map;
 
 public class IntegrationHandler {
 
-    public void executeIntegration() {
+    public void executeIntegration(Stage primaryStage) { 
         System.out.println("🔄 Iniciando integración de datos...");
 
         // Obtener configuraciones de bases de datos
@@ -22,6 +25,19 @@ public class IntegrationHandler {
             return;
         }
 
+        // Pedir al usuario que seleccione la carpeta de destino
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Seleccionar carpeta de destino");
+        File selectedDirectory = directoryChooser.showDialog(primaryStage);
+
+        if (selectedDirectory == null) {
+            System.out.println("⚠️ No se seleccionó ninguna carpeta. Cancelando exportación.");
+            return;
+        }
+
+        String outputDirectory = selectedDirectory.getAbsolutePath();
+        System.out.println("📂 Carpeta seleccionada: " + outputDirectory);
+
         for (Map.Entry<String, DatabaseConfig> entry : dbConfigs.entrySet()) {
             String dbName = entry.getKey();
             DatabaseConfig config = entry.getValue();
@@ -31,19 +47,13 @@ public class IntegrationHandler {
             DatabaseConnection dbConnection;
             if ("MySQL".equalsIgnoreCase(config.getTipoBD())) {
                 dbConnection = new DatabaseConnectionMySQL(
-                        config.getHost(),
-                        config.getPuerto(),
-                        config.getUsuario(),
-                        config.getPassword(),
-                        config.getNombreBD()
+                        config.getHost(), config.getPuerto(), config.getUsuario(),
+                        config.getPassword(), config.getNombreBD()
                 );
             } else if ("PostgreSQL".equalsIgnoreCase(config.getTipoBD())) {
                 dbConnection = new DatabaseConnectionPostgreSQL(
-                        config.getHost(),
-                        config.getPuerto(),
-                        config.getUsuario(),
-                        config.getPassword(),
-                        config.getNombreBD()
+                        config.getHost(), config.getPuerto(), config.getUsuario(),
+                        config.getPassword(), config.getNombreBD()
                 );
             } else {
                 System.out.println("⚠️ Tipo de base de datos no soportado: " + config.getTipoBD());
@@ -54,52 +64,24 @@ public class IntegrationHandler {
             List<String> selectedTables = DatabaseSelectionManager.getSelectedTables(dbName);
             System.out.println("📌 Tablas seleccionadas para " + dbName + ": " + selectedTables);
 
-            if (selectedTables.isEmpty()) {
-                System.out.println("⚠️ No hay tablas seleccionadas para la base de datos: " + dbName);
-                System.out.println("📌 Se ejecutará processDatabase() de todas formas.");
-            }
+            // Definir rutas dinámicas
+            String turtlePath = Paths.get(outputDirectory, dbName + "_output.ttl").toString();
+            String rdfPath = Paths.get(outputDirectory, dbName + "_output.rdf").toString();
 
-// Configuración de rutas de salida
-            String turtlePath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", dbName + "_output.ttl").toString();
-            String rdfPath = Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", dbName + "_output.rdf").toString();
-
-            System.out.println("📂 Generando archivos en:");
+            System.out.println("📂 Guardando archivos en:");
             System.out.println("   - TTL: " + turtlePath);
             System.out.println("   - RDF: " + rdfPath);
 
-// Procesar la base de datos, **incluso si no hay tablas seleccionadas**
+            // Procesar la base de datos
             processDatabase(dbConnection, turtlePath, rdfPath);
-
         }
 
         // Integración RDFs generados
         System.out.println("🔄 Integrando RDFs...");
-
-// Lista de archivos RDF generados dinámicamente
-        List<String> rdfFiles = dbConfigs.keySet().stream()
-                .map(name -> Paths.get("C:", "Users", "darwi", "OneDrive", "Desktop", "RutaProyecto", name + "_output.rdf").toString())
-                .toList();
-
         RDFIntegrator integrator = new RDFIntegrator();
 
-// Verificar que haya al menos un RDF para integrar
-        if (rdfFiles.isEmpty()) {
-            System.out.println("⚠️ No hay archivos RDF generados para integrar.");
-        } else if (rdfFiles.size() == 1) {
-            System.out.println("⚠️ Solo se generó un archivo RDF, no hay necesidad de integración múltiple.");
-        } else {
-            // Tomar el primer RDF como base
-            String rdfBase = rdfFiles.get(0);
-
-            // Integrar los siguientes RDFs sobre el primero
-            for (int i = 1; i < rdfFiles.size(); i++) {
-                System.out.println("🔗 Integrando RDF: " + rdfFiles.get(i) + " en " + rdfBase);
-                integrator.integrateRDF(rdfBase, rdfFiles.get(i));
-            }
-        }
-
-// Exportar en diferentes formatos
-        String outputBasePath = "C:/Users/darwi/OneDrive/Desktop/RutaProyecto/unified_output";
+        // Exportar en diferentes formatos en la carpeta seleccionada
+        String outputBasePath = Paths.get(outputDirectory, "unified_output").toString();
         integrator.exportToRDFXML(outputBasePath + ".rdf");
         integrator.exportToCSV(outputBasePath + ".csv");
         integrator.exportToJSON(outputBasePath + ".json");
@@ -107,6 +89,8 @@ public class IntegrationHandler {
 
         System.out.println("✅ Integración finalizada. Exportaciones completadas.");
 
+        // Abrir la carpeta automáticamente
+        openFolder(outputDirectory);
     }
 
     private void processDatabase(DatabaseConnection dbConnection, String outputTurtlePath, String outputRDFPath) {
@@ -137,4 +121,18 @@ public class IntegrationHandler {
         }
     }
 
+    private void openFolder(String folderPath) {
+        try {
+            File folder = new File(folderPath);
+            if (folder.exists()) {
+                System.out.println("📂 Abriendo carpeta: " + folderPath);
+                new ProcessBuilder("explorer.exe", folderPath).start(); // Abre la carpeta en Windows
+            } else {
+                System.out.println("⚠️ La carpeta no existe.");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error al abrir la carpeta: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

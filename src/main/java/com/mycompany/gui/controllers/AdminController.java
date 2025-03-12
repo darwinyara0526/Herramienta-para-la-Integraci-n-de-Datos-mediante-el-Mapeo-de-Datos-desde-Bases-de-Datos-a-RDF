@@ -50,7 +50,7 @@ public class AdminController {
         System.out.println("Inicializando AdminController...");
         System.out.println("zonaArrastre: " + zonaArrastre);
         System.out.println("zonaArrastre2: " + zonaArrastre2);
-        
+
         mostrarSeleccion();
 
         if (zonaArrastre == null || zonaArrastre2 == null) {
@@ -87,11 +87,14 @@ public class AdminController {
     private void iniciarIntegracion() {
         progresoIntegracion.setProgress(0.1);
 
+        // Obtener el `Stage` actual para pasarlo a `executeIntegration()`
+        Stage stage = (Stage) progresoIntegracion.getScene().getWindow();
+
         // Iniciar el proceso de integración
         System.out.println("Iniciando integración de datos...");
 
         IntegrationHandler integrationHandler = new IntegrationHandler();
-        integrationHandler.executeIntegration(); // Llamada al método de integración
+        integrationHandler.executeIntegration(stage); // Pasamos el `Stage`
 
         progresoIntegracion.setProgress(1.0);
         System.out.println("Integración finalizada.");
